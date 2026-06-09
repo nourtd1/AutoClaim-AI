@@ -10,7 +10,9 @@ import {
   assignReviewer,
   addStageEvent,
   updateClaim,
+  getMaestroInstanceId,
 } from "@/lib/db";
+import { maestroCompleteHumanReview } from "@/lib/maestro";
 
 initDb();
 
@@ -115,6 +117,14 @@ export async function POST(
       actor: "HUMAN",
       notes: `${decision}: ${notes}`,
     });
+
+    // Notify Maestro Action Center — use the real Maestro instanceId stored at intake
+    const maestroInstanceId = getMaestroInstanceId(claimId) ?? claimId;
+    await maestroCompleteHumanReview(
+      maestroInstanceId,
+      decision === "REQUEST_MORE_INFO" ? "APPROVE" : decision,
+      notes
+    );
 
     const updated = getClaimById(claimId);
     return NextResponse.json({ data: { claim: updated }, error: null });

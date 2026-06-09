@@ -1,6 +1,72 @@
-import { getClaimById, addStageEvent, getAllClaims } from "./db";
+import nodemailer from "nodemailer";
+import { getClaimById, getReviewerById, addStageEvent, getAllClaims, setMaestroInstanceId } from "./db";
 import { extractClaimData, validateClaim } from "./agents";
+import {
+  maestroStartClaim,
+  maestroAdvanceStage,
+} from "./maestro";
 import type { ClaimStage } from "./types";
+
+// ── Email notification (no-op if SMTP not configured) ────────────────────────
+
+async function notifyReviewer(claimId: string): Promise<void> {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env;
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM) {
+    console.warn("[orchestrator] SMTP not configured — skipping reviewer email");
+    return;
+  }
+
+  const claim = getClaimById(claimId);
+  if (!claim?.assignedTo) return;
+
+  const reviewer = getReviewerById(claim.assignedTo);
+  if (!reviewer?.email) return;
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const claimUrl = `${baseUrl}/claims/${claimId}`;
+
+  try {
+    const transport = nodemailer.createTransport({
+      host:   SMTP_HOST,
+      port:   Number(SMTP_PORT),
+      secure: Number(SMTP_PORT) === 465,
+      auth:   { user: SMTP_USER, pass: SMTP_PASS },
+    });
+
+    await transport.sendMail({
+      from:    SMTP_FROM,
+      to:      reviewer.email,
+      subject: `[AutoClaim AI] Review Required — Claim #${claimId.slice(-8)}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+          <div style="background:linear-gradient(135deg,#10B981,#7C3AED);padding:24px;border-radius:8px 8px 0 0">
+            <h1 style="color:white;margin:0;font-size:20px">AutoClaim AI</h1>
+            <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:13px">UiPath AgentHack 2026 · Human Review Required</p>
+          </div>
+          <div style="border:1px solid #e5e7eb;border-top:none;padding:24px;border-radius:0 0 8px 8px">
+            <p style="color:#374151">Hi ${reviewer.name},</p>
+            <p style="color:#374151">A claim has been routed for your review:</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px">
+              <tr><td style="padding:8px;color:#6b7280">Claim ID</td><td style="padding:8px;font-weight:600">#${claimId.slice(-8)}</td></tr>
+              <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Claimant</td><td style="padding:8px;font-weight:600">${claim.claimantName}</td></tr>
+              <tr><td style="padding:8px;color:#6b7280">Type</td><td style="padding:8px">${claim.claimType.replace(/_/g," ")}</td></tr>
+              <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Amount</td><td style="padding:8px;font-weight:600">${claim.claimAmount} ${claim.currency}</td></tr>
+              <tr><td style="padding:8px;color:#6b7280">Stage</td><td style="padding:8px;color:#d97706;font-weight:600">HUMAN_REVIEW</td></tr>
+            </table>
+            <a href="${claimUrl}" style="display:inline-block;background:#7C3AED;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">
+              Review Claim →
+            </a>
+            <p style="color:#9ca3af;font-size:12px;margin-top:24px">AutoClaim AI · UiPath AgentHack 2026</p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log(`[orchestrator] Review email sent to ${reviewer.email} for claim ${claimId}`);
+  } catch (err) {
+    console.error(`[orchestrator] Failed to send reviewer email for claim ${claimId}:`, err);
+  }
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,7 +107,7 @@ export class ClaimOrchestrator {
     const claim = getClaimById(claimId);
     if (!claim) throw new Error(`Claim not found: ${claimId}`);
 
-    // Step 1 — INTAKE
+    // ── INTAKE ────────────────────────────────────────────────────────────────
     addStageEvent({
       claimId,
       stage: "INTAKE",
@@ -49,9 +115,24 @@ export class ClaimOrchestrator {
       actor: "ROBOT",
       notes: "Orchestrator: workflow started, processing intake",
     });
+
+    // Start a real Maestro process instance (no-op if not configured)
+    const maestroInstanceId = await maestroStartClaim(claimId, {
+      policyNumber: claim.policyNumber,
+      claimantName: claim.claimantName,
+      claimType:    claim.claimType,
+      claimAmount:  claim.claimAmount,
+      currency:     claim.currency,
+    });
+
+    // Persist the Maestro instanceId so the decision route can use it later
+    if (maestroInstanceId) {
+      setMaestroInstanceId(claimId, maestroInstanceId);
+    }
+
     await delay(500);
 
-    // Step 2 — EXTRACTION
+    // ── EXTRACTION ────────────────────────────────────────────────────────────
     addStageEvent({
       claimId,
       stage: "EXTRACTION",
@@ -68,7 +149,15 @@ export class ClaimOrchestrator {
       notes: `Orchestrator: extraction complete, confidence=${extracted.confidence.toFixed(2)}`,
     });
 
-    // Step 3 — VALIDATION
+    // Advance Maestro BPMN to EXTRACTION task
+    if (maestroInstanceId) {
+      await maestroAdvanceStage(maestroInstanceId, "EXTRACTION", {
+        confidence: extracted.confidence,
+        extractedFields: Object.keys(extracted).length,
+      });
+    }
+
+    // ── VALIDATION ────────────────────────────────────────────────────────────
     addStageEvent({
       claimId,
       stage: "VALIDATION",
@@ -78,7 +167,15 @@ export class ClaimOrchestrator {
     });
     const result = await validateClaim(claimId);
 
-    // Step 4 — routing outcome (status already updated by routeCase inside validateClaim)
+    // Advance Maestro BPMN to VALIDATION task
+    if (maestroInstanceId) {
+      await maestroAdvanceStage(maestroInstanceId, "VALIDATION", {
+        isValid:   result.isValid,
+        riskScore: result.riskScore,
+      });
+    }
+
+    // ── ROUTING ───────────────────────────────────────────────────────────────
     const routed = getClaimById(claimId);
     if (!routed) return;
 
@@ -90,6 +187,9 @@ export class ClaimOrchestrator {
         actor: "ROBOT",
         notes: `Orchestrator: auto-approved. Risk score: ${result.riskScore}`,
       });
+      if (maestroInstanceId) {
+        await maestroAdvanceStage(maestroInstanceId, "RESOLUTION", { outcome: "AUTO_APPROVED" });
+      }
     } else {
       addStageEvent({
         claimId,
@@ -98,6 +198,16 @@ export class ClaimOrchestrator {
         actor: "ROBOT",
         notes: `Orchestrator: routed to human review. status=${routed.status}, riskScore=${result.riskScore}`,
       });
+      // Send email to assigned reviewer
+      await notifyReviewer(claimId);
+
+      // Maestro BPMN stays at HUMAN_REVIEW User Task — Action Center will await
+      if (maestroInstanceId) {
+        await maestroAdvanceStage(maestroInstanceId, "HUMAN_REVIEW", {
+          riskScore: result.riskScore,
+          reasons:   result.errors,
+        });
+      }
     }
   }
 

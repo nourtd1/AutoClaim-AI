@@ -91,12 +91,16 @@ export function initDb(): void {
     );
   `);
 
-  // idempotent migration: add deletedAt if the column doesn't exist yet
+  // idempotent migrations
   const cols = db
     .prepare("PRAGMA table_info(claims)")
     .all() as { name: string }[];
   if (!cols.some((c) => c.name === "deletedAt")) {
     db.exec("ALTER TABLE claims ADD COLUMN deletedAt TEXT");
+  }
+  const freshCols = db.prepare("PRAGMA table_info(claims)").all() as { name: string }[];
+  if (!freshCols.some((c) => c.name === "maestroInstanceId")) {
+    db.exec("ALTER TABLE claims ADD COLUMN maestroInstanceId TEXT");
   }
 }
 
@@ -489,6 +493,19 @@ export function getReviewersByRole(role: string): Reviewer[] {
     .prepare("SELECT * FROM reviewers WHERE role = ? AND isAvailable = 1")
     .all(role) as ReviewerRow[];
   return rows.map(rowToReviewer);
+}
+
+export function setMaestroInstanceId(claimId: string, maestroInstanceId: string): void {
+  getDb()
+    .prepare("UPDATE claims SET maestroInstanceId = ?, updatedAt = ? WHERE id = ?")
+    .run(maestroInstanceId, new Date().toISOString(), claimId);
+}
+
+export function getMaestroInstanceId(claimId: string): string | null {
+  const row = getDb()
+    .prepare("SELECT maestroInstanceId FROM claims WHERE id = ?")
+    .get(claimId) as { maestroInstanceId: string | null } | undefined;
+  return row?.maestroInstanceId ?? null;
 }
 
 export function appendReviewNotes(id: string, notes: string): Claim {

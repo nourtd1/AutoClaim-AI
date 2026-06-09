@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import AnthropicBedrock from "@anthropic-ai/bedrock-sdk";
 import {
   getDb,
   getClaimById,
@@ -17,11 +18,44 @@ import type {
   Reviewer,
 } from "./types";
 
-// ── Anthropic client ──────────────────────────────────────────────────────────
+// ── Client selection: Bedrock (AWS) or direct Anthropic API ──────────────────
+// Set CLAUDE_CODE_USE_BEDROCK=1 in .env.local to use AWS Bedrock.
+// Otherwise set ANTHROPIC_API_KEY for the direct Anthropic API.
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const USE_BEDROCK = process.env.CLAUDE_CODE_USE_BEDROCK === "1";
+
+// Bedrock cross-region inference profile — same model as Claude Code itself
+const BEDROCK_MODEL = "us.anthropic.claude-sonnet-4-6";
+
+// Direct API model (kept for future use when switching back)
+const DIRECT_MODEL = "claude-sonnet-4-5-20251022";
+
+type ClientMessages = {
+  create: (params: {
+    model: string;
+    max_tokens: number;
+    system: string;
+    messages: { role: "user"; content: string }[];
+  }) => Promise<{ content: Array<{ type: string; text?: string }> }>;
+};
+
+function getClient(): { messages: ClientMessages; model: string } {
+  if (USE_BEDROCK) {
+    const accessKey = process.env.AWS_ACCESS_KEY_ID;
+    const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
+    const region    = process.env.AWS_REGION ?? "us-east-1";
+    // If both keys are present, pass them explicitly (BothStaticCreds overload).
+    // Otherwise let the SDK use the AWS credential provider chain (NoStaticCreds overload).
+    const client = accessKey && secretKey
+      ? new AnthropicBedrock({ awsAccessKey: accessKey, awsSecretKey: secretKey, awsRegion: region })
+      : new AnthropicBedrock({ awsRegion: region });
+    return { messages: client.messages as unknown as ClientMessages, model: BEDROCK_MODEL };
+  }
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return { messages: client.messages as unknown as ClientMessages, model: DIRECT_MODEL };
+}
+
+const { messages: anthropicMessages, model: MODEL } = getClient();
 
 // ── Extraction agent ──────────────────────────────────────────────────────────
 
@@ -58,23 +92,25 @@ export async function extractClaimData(claimId: string): Promise<ExtractedData> 
     .filter(Boolean)
     .join("\n");
 
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+  const message = await anthropicMessages.create({
+    model: MODEL,
     max_tokens: 1024,
     system: EXTRACTION_SYSTEM_PROMPT,
     messages: [{ role: "user", content: sourceText }],
   });
 
   const rawContent = message.content[0];
-  if (!rawContent || rawContent.type !== "text") {
+  if (!rawContent || rawContent.type !== "text" || !rawContent.text) {
     throw new Error("Unexpected response type from Claude API");
   }
 
+  // Strip markdown code fences if the model wraps its response (e.g. ```json ... ```)
+  const rawText = rawContent.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
   let extracted: ExtractedData;
   try {
-    extracted = JSON.parse(rawContent.text) as ExtractedData;
+    extracted = JSON.parse(rawText) as ExtractedData;
   } catch {
-    throw new Error(`Failed to parse Claude response as JSON: ${rawContent.text}`);
+    throw new Error(`Failed to parse Claude response as JSON: ${rawText}`);
   }
 
   if (extracted.confidence < 0.6) {

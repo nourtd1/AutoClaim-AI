@@ -2,10 +2,59 @@
 
 import type { StageEvent, ClaimStage } from "@/lib/types";
 
+// ── Stage SVG icons (defined here, not passed as prop across Server→Client boundary) ──
+
+function StageIcon({ stage }: { stage: string }) {
+  const cls = "w-3.5 h-3.5";
+  switch (stage) {
+    case "INTAKE": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M5 8h6M8 5v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    );
+    case "EXTRACTION": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    );
+    case "VALIDATION": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <path d="M8 2L14 5v4c0 3-2.5 4.5-6 5-3.5-.5-6-2-6-5V5L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M5.5 8l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+    case "EXCEPTION_ROUTING": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <path d="M8 2L14 14H2L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M8 7v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="8" cy="12" r="0.75" fill="currentColor"/>
+      </svg>
+    );
+    case "HUMAN_REVIEW": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M2.5 13.5c0-2.5 2.5-4 5.5-4s5.5 1.5 5.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    );
+    case "RESOLUTION": return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M5 8l2.5 2.5L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+    default: return (
+      <svg className={cls} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+    );
+  }
+}
+
 interface ClaimTimelineProps {
   events: StageEvent[];
   currentStage?: ClaimStage;
-  StageIcon?: React.ComponentType<{ stage: string }>;
 }
 
 const ACTOR_ICON: Record<string, string> = {
@@ -41,7 +90,7 @@ function absoluteTime(iso: string): string {
   });
 }
 
-export default function ClaimTimeline({ events, currentStage, StageIcon }: ClaimTimelineProps) {
+export default function ClaimTimeline({ events, currentStage }: ClaimTimelineProps) {
   if (!events.length) {
     return <p className="text-xs text-slate-600 py-4 text-center">No timeline events yet</p>;
   }
@@ -87,8 +136,11 @@ export default function ClaimTimeline({ events, currentStage, StageIcon }: Claim
               {ev.notes && (
                 <p className="mt-1 text-xs text-slate-400 leading-relaxed">{ev.notes}</p>
               )}
-              <span className="mt-1.5 inline-block text-[10px] text-slate-600 font-mono-id cursor-default"
-                title={absoluteTime(ev.timestamp)}>
+              <span
+                className="mt-1.5 inline-block text-[10px] text-slate-600 font-mono-id cursor-default"
+                title={absoluteTime(ev.timestamp)}
+                suppressHydrationWarning
+              >
                 {relativeTime(ev.timestamp)}
               </span>
             </div>

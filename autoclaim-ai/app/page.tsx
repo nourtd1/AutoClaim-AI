@@ -160,7 +160,7 @@ export default function DashboardPage() {
                     </p>
                     {ev.notes && <p className="text-slate-500 truncate mt-0.5">{ev.notes}</p>}
                   </div>
-                  <time className="shrink-0 text-slate-600 font-mono-id tabular-nums">{relativeTime(ev.timestamp)}</time>
+                  <time className="shrink-0 text-slate-600 font-mono-id tabular-nums" suppressHydrationWarning>{relativeTime(ev.timestamp)}</time>
                 </li>
               ))}
             </ol>
