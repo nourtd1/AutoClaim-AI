@@ -13,6 +13,7 @@ const geistMono = localFont({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${geistMono.variable} ${inter.variable}`}>
       <body className="antialiased">
         <Sidebar />
-        <div className="md:pl-14 pb-16 md:pb-0">
+        <div className="md:pl-52 pb-16 md:pb-0">
           {children}
         </div>
       </body>

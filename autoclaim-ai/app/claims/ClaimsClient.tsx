@@ -66,31 +66,39 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
     setTimeout(() => setCopied(null), 1500);
   };
 
-  const selectClass = "rounded-lg border border-white/10 bg-slate-900 text-slate-300 text-xs px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer";
+  const selectClass = "rounded-lg text-xs px-2.5 py-1.5 focus:outline-none cursor-pointer transition-all duration-200";
+  const selectStyle = { background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "#E9D5FF" };
+  const inputClass  = "flex-1 min-w-[180px] rounded-lg text-xs px-3 py-1.5 placeholder:opacity-30 focus:outline-none transition-all duration-200";
 
   return (
     <div className="space-y-4">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          placeholder="Search by ID, name or policy…"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 min-w-[160px] rounded-lg border border-white/10 bg-slate-900 text-slate-200 text-xs px-3 py-1.5 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        />
+        <div className="relative flex-1 min-w-[180px]">
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "rgba(168,85,247,0.45)" }}>
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="search"
+            placeholder="Search by ID, name or policy…"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className={`${inputClass} pl-7`}
+            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "#E9D5FF" }}
+          />
+        </div>
 
-        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as ClaimStatus | ""); setPage(1); }} className={selectClass}>
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as ClaimStatus | ""); setPage(1); }} className={selectClass} style={selectStyle}>
           <option value="">All Statuses</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
         </select>
 
-        <select value={priorityFilter} onChange={(e) => { setPriorityFilter(e.target.value as ClaimPriority | ""); setPage(1); }} className={selectClass}>
+        <select value={priorityFilter} onChange={(e) => { setPriorityFilter(e.target.value as ClaimPriority | ""); setPage(1); }} className={selectClass} style={selectStyle}>
           <option value="">All Priorities</option>
           {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
 
-        <select value={sourceFilter} onChange={(e) => { setSourceFilter(e.target.value); setPage(1); }} className={selectClass}>
+        <select value={sourceFilter} onChange={(e) => { setSourceFilter(e.target.value); setPage(1); }} className={selectClass} style={selectStyle}>
           <option value="">All Sources</option>
           {SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -98,68 +106,86 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
         <button
           onClick={refresh}
           disabled={isPending}
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-900 hover:border-emerald-700 transition-colors px-3 py-1.5 text-xs text-slate-400 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200 disabled:opacity-40"
+          style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "rgba(196,132,252,0.7)" }}
         >
-          <span className={isPending ? "animate-spin" : ""}>↻</span> Refresh
+          <svg className={`w-3 h-3 ${isPending ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+          </svg>
+          Refresh
         </button>
       </div>
 
       {/* ── Count line ── */}
-      <p className="text-xs text-slate-500">
-        {filtered.length} claim{filtered.length !== 1 ? "s" : ""} found
-        {search || statusFilter || priorityFilter || sourceFilter ? " (filtered)" : ""}
+      <p className="text-[11px]" style={{ color: "rgba(168,85,247,0.4)" }}>
+        <span className="font-semibold" style={{ color: "#C084FC" }}>{filtered.length}</span> claim{filtered.length !== 1 ? "s" : ""}
+        {search || statusFilter || priorityFilter || sourceFilter ? <span style={{ color: "rgba(168,85,247,0.3)" }}> · filtered</span> : ""}
       </p>
 
       {/* ── Table (desktop) ── */}
-      <div className="hidden md:block glass rounded-xl2 overflow-hidden">
+      <div className="hidden md:block rounded-xl2 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(124,58,237,0.04) 100%)", border: "1px solid rgba(168,85,247,0.18)", backdropFilter: "blur(24px)" }}>
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-white/[0.06] text-slate-500 uppercase tracking-wider text-[10px]">
-              <th className="px-4 py-3 text-left font-medium">ID</th>
-              <th className="px-4 py-3 text-left font-medium">Claimant</th>
-              <th className="px-4 py-3 text-left font-medium">Type</th>
-              <th className="px-4 py-3 text-right font-medium">Amount</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-              <th className="px-4 py-3 text-left font-medium">Priority</th>
-              <th className="px-4 py-3 text-left font-medium">Stage</th>
-              <th className="px-4 py-3 text-right font-medium">Created</th>
+            <tr className="uppercase tracking-widest text-[10px]" style={{ borderBottom: "1px solid rgba(168,85,247,0.15)", color: "rgba(168,85,247,0.45)" }}>
+              <th className="px-4 py-3 text-left font-semibold">ID</th>
+              <th className="px-4 py-3 text-left font-semibold">Claimant</th>
+              <th className="px-4 py-3 text-left font-semibold">Type</th>
+              <th className="px-4 py-3 text-right font-semibold">Amount</th>
+              <th className="px-4 py-3 text-left font-semibold">Status</th>
+              <th className="px-4 py-3 text-left font-semibold">Priority</th>
+              <th className="px-4 py-3 text-left font-semibold">Stage</th>
+              <th className="px-4 py-3 text-right font-semibold">Created</th>
             </tr>
           </thead>
           <tbody>
             {pageClaims.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-slate-600">No claims match your filters</td>
+                <td colSpan={8} className="px-4 py-12 text-center">
+                  <div className="flex flex-col items-center gap-2" style={{ color: "rgba(168,85,247,0.3)" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    No claims match your filters
+                  </div>
+                </td>
               </tr>
             )}
             {pageClaims.map((c) => (
               <tr
                 key={c.id}
                 onClick={() => window.location.href = `/claims/${c.id}`}
-                className="border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer transition-colors"
+                className="cursor-pointer transition-all duration-150 group"
+                style={{ borderBottom: "1px solid rgba(168,85,247,0.08)" }}
+                onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "rgba(168,85,247,0.07)"}
+                onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = "transparent"}
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono-id text-slate-400">{c.id.slice(0, 8)}…</span>
+                    <span className="font-mono-id tabular-nums" style={{ color: "rgba(168,85,247,0.5)" }}>{c.id.slice(0, 8)}…</span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); copyId(c.id); }}
                       title="Copy full ID"
-                      className="text-slate-600 hover:text-slate-300 transition-colors"
+                      style={{ color: copied === c.id ? "#A855F7" : "rgba(168,85,247,0.25)" }}
+                      className="transition-colors hover:!text-purple-400"
                     >
-                      {copied === c.id ? "✓" : "⎘"}
+                      {copied === c.id
+                        ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      }
                     </button>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-slate-200 font-medium">{c.claimantName}</p>
-                  <p className="text-slate-600 font-mono-id text-[10px]">{c.policyNumber}</p>
+                  <p className="font-semibold" style={{ color: "#E9D5FF" }}>{c.claimantName}</p>
+                  <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "rgba(168,85,247,0.35)" }}>{c.policyNumber}</p>
                 </td>
-                <td className="px-4 py-3 text-slate-400">{c.claimType.replace(/_/g," ")}</td>
-                <td className="px-4 py-3 text-right font-mono-id font-semibold text-emerald-400 tabular-nums">{fmtAmount(c.claimAmount, c.currency)}</td>
+                <td className="px-4 py-3" style={{ color: "rgba(228,216,255,0.45)" }}>{c.claimType.replace(/_/g," ")}</td>
+                <td className="px-4 py-3 text-right font-mono-id font-bold tabular-nums" style={{ color: "#C084FC" }}>{fmtAmount(c.claimAmount, c.currency)}</td>
                 <td className="px-4 py-3"><StatusBadge status={c.status} size="sm" /></td>
                 <td className="px-4 py-3"><PriorityBadge priority={c.priority} size="sm" /></td>
-                <td className="px-4 py-3 text-slate-500">{c.stage.replace(/_/g," ")}</td>
-                <td className="px-4 py-3 text-right text-slate-600 font-mono-id tabular-nums">{fmtDate(c.createdAt)}</td>
+                <td className="px-4 py-3" style={{ color: "rgba(168,85,247,0.4)" }}>{c.stage.replace(/_/g," ")}</td>
+                <td className="px-4 py-3 text-right font-mono-id tabular-nums" style={{ color: "rgba(168,85,247,0.35)" }}>{fmtDate(c.createdAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -172,16 +198,18 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
           <p className="text-center text-xs text-slate-600 py-8">No claims match your filters</p>
         )}
         {pageClaims.map((c) => (
-          <Link key={c.id} href={`/claims/${c.id}`} className="block glass glass-hover rounded-xl p-3.5 space-y-2">
+          <Link key={c.id} href={`/claims/${c.id}`}
+            className="block rounded-xl p-3.5 space-y-2.5 transition-all duration-200"
+            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", backdropFilter: "blur(20px)" }}>
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-slate-200">{c.claimantName}</p>
-                <p className="font-mono-id text-[10px] text-slate-500">{c.policyNumber}</p>
+                <p className="text-sm font-semibold" style={{ color: "#E9D5FF" }}>{c.claimantName}</p>
+                <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "rgba(168,85,247,0.4)" }}>{c.policyNumber}</p>
               </div>
               <StatusBadge status={c.status} size="sm" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono-id font-bold text-emerald-400">{fmtAmount(c.claimAmount, c.currency)}</span>
+              <span className="font-mono-id font-bold" style={{ color: "#C084FC" }}>{fmtAmount(c.claimAmount, c.currency)}</span>
               <PriorityBadge priority={c.priority} size="sm" />
             </div>
           </Link>
@@ -190,23 +218,25 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
 
       {/* ── Pagination ── */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
+        <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="rounded-lg border border-white/10 px-3 py-1 text-xs text-slate-400 disabled:opacity-30 hover:border-white/20 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 disabled:opacity-25 hover:border-white/[0.15] hover:text-slate-300 transition-all duration-200"
           >
-            ← Prev
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Prev
           </button>
-          <span className="text-xs text-slate-500 font-mono-id">
-            {page} / {totalPages}
+          <span className="text-xs text-slate-600 font-mono-id">
+            <span className="text-slate-400">{page}</span> / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="rounded-lg border border-white/10 px-3 py-1 text-xs text-slate-400 disabled:opacity-30 hover:border-white/20 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 disabled:opacity-25 hover:border-white/[0.15] hover:text-slate-300 transition-all duration-200"
           >
-            Next →
+            Next
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
       )}

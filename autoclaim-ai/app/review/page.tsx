@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { initDb, getDb, getAvailableReviewers } from "@/lib/db";
 import type { Claim, Reviewer, ValidationResult } from "@/lib/types";
 import ReviewQueueClient from "./ReviewQueueClient";
+import TopBar from "@/components/TopBar";
 
 initDb();
 
@@ -70,42 +70,25 @@ export default async function ReviewQueuePage() {
   const escalatedCount = items.filter((i) => i.status === "ESCALATED").length;
   const pendingCount   = items.filter((i) => i.status === "PENDING_REVIEW").length;
 
+  const queueSubtitle = items.length === 0
+    ? "Queue is clear — all caught up ✓"
+    : [
+        escalatedCount > 0 ? `${escalatedCount} escalated` : "",
+        pendingCount > 0   ? `${pendingCount} pending`     : "",
+      ].filter(Boolean).join(" · ") + " · auto-refreshes every 30s";
+
   return (
-    <div className="min-h-screen bg-[#0F1117]">
-      <header className="sticky top-0 z-40 glass border-b border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500 to-violet-600 flex items-center justify-center text-white font-bold text-xs">AC</div>
-              <span className="font-semibold text-slate-100 text-sm">AutoClaim <span className="text-emerald-400">AI</span></span>
-            </Link>
-            <span className="text-slate-700">/</span>
-            <span className="text-sm text-slate-300 font-medium">Review Queue</span>
-            {items.length > 0 && (
-              <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                {items.length}
-              </span>
-            )}
-          </div>
-          <Link href="/claims/new" className="rounded-lg bg-emerald-500 hover:bg-emerald-400 transition-colors px-3 py-1.5 text-xs font-semibold text-white">
-            + New Claim
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen">
+      <TopBar
+        title="Review Queue"
+        subtitle={queueSubtitle}
+        badge={items.length > 0 ? String(items.length) : undefined}
+      />
 
       <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-slate-100">Review Queue</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {escalatedCount > 0 && <span className="text-rose-400">{escalatedCount} escalated</span>}
-            {escalatedCount > 0 && pendingCount > 0 && <span className="text-slate-600"> · </span>}
-            {pendingCount > 0 && <span className="text-orange-400">{pendingCount} pending review</span>}
-            {items.length === 0 && "Queue is clear"}
-            <span className="text-slate-600"> — auto-refreshes every 30s</span>
-          </p>
+        <div className="animate-fade-up-1">
+          <ReviewQueueClient initialItems={items} availableReviewers={reviewers} />
         </div>
-
-        <ReviewQueueClient initialItems={items} availableReviewers={reviewers} />
       </main>
     </div>
   );

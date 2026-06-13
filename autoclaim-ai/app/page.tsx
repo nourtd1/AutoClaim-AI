@@ -3,12 +3,10 @@ import type { Metadata } from "next";
 import { initDb, getAllClaims, getRecentStageEvents, getDb } from "@/lib/db";
 import type { ClaimStatus } from "@/lib/types";
 import LiveFeed from "./dashboard/LiveFeed";
+import TopBar from "@/components/TopBar";
 
 initDb();
-
 export const metadata: Metadata = { title: "Dashboard" };
-
-// ── Stats (direct DB, no internal HTTP) ──────────────────────────────────────
 
 interface DashboardStats {
   total: number; approved: number; rejected: number;
@@ -19,12 +17,8 @@ interface DashboardStats {
 function fetchStats(): DashboardStats {
   const db = getDb();
   const s = new Date(); s.setHours(0, 0, 0, 0);
-  const start = s.toISOString();
-  const end   = new Date().toISOString();
-
-  type CR = { cnt: number };
-  type AR = { avg_minutes: number | null };
-
+  const start = s.toISOString(), end = new Date().toISOString();
+  type CR = { cnt: number }; type AR = { avg_minutes: number | null };
   const total    = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE createdAt>=? AND createdAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
   const approved = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
   const rejected = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status='REJECTED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
@@ -32,166 +26,257 @@ function fetchStats(): DashboardStats {
   const pending  = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status IN ('PENDING_REVIEW','ESCALATED') AND deletedAt IS NULL`).get() as CR).cnt;
   const avgRow   = db.prepare(`SELECT AVG((julianday(resolvedAt)-julianday(createdAt))*1440) as avg_minutes FROM claims WHERE resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as AR;
   const avgProcessingTime = Math.round(avgRow.avg_minutes ?? 0);
-
   const approvedIds = (db.prepare(`SELECT id FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).all(start,end) as {id:string}[]).map(r=>r.id);
   let autoApproved = 0;
-  for (const id of approvedIds) {
-    if (!db.prepare(`SELECT 1 FROM stage_events WHERE claimId=? AND actor='HUMAN' LIMIT 1`).get(id)) autoApproved++;
-  }
-  const autoApprovalRate = approved > 0 ? Math.round((autoApproved / approved) * 100) : 0;
+  for (const id of approvedIds) if (!db.prepare(`SELECT 1 FROM stage_events WHERE claimId=? AND actor='HUMAN' LIMIT 1`).get(id)) autoApproved++;
+  const autoApprovalRate = approved > 0 ? Math.round((autoApproved/approved)*100) : 0;
   return { total, approved, rejected, escalated, pending, avgProcessingTime, autoApprovalRate };
 }
 
-// ── KPI card with tooltip ─────────────────────────────────────────────────────
+// ── KPI Card ─────────────────────────────────────────────────────────────────
 
-function KpiCard({ label, value, sub, accent, tooltip }: {
-  label: string; value: string | number; sub?: string;
-  accent?: "emerald"|"violet"|"orange"|"rose"; tooltip: string;
-}) {
-  const accentClass = { emerald:"text-emerald-400", violet:"text-violet-400", orange:"text-orange-400", rose:"text-rose-400" }[accent ?? "emerald"];
+interface KpiConfig {
+  label: string;
+  value: string | number;
+  sub?: string;
+  tooltip: string;
+  icon: React.ReactNode;
+  delay: string;
+  variant: "purple" | "pink" | "amber" | "teal";
+}
+
+function KpiCard({ label, value, sub, tooltip, icon, delay, variant }: KpiConfig) {
+  const styles = {
+    purple: {
+      card: "rgba(168,85,247,0.08)",
+      border: "rgba(168,85,247,0.25)",
+      borderHover: "rgba(168,85,247,0.45)",
+      iconBg: "linear-gradient(135deg, rgba(168,85,247,0.25), rgba(124,58,237,0.15))",
+      iconBorder: "rgba(168,85,247,0.3)",
+      iconColor: "#C084FC",
+      topLine: "linear-gradient(90deg, transparent, #A855F7, transparent)",
+      valueGlow: "0 0 20px rgba(168,85,247,0.5)",
+      valueColor: "#E9D5FF",
+    },
+    pink: {
+      card: "rgba(236,72,153,0.07)",
+      border: "rgba(236,72,153,0.22)",
+      borderHover: "rgba(236,72,153,0.42)",
+      iconBg: "linear-gradient(135deg, rgba(236,72,153,0.25), rgba(190,24,93,0.15))",
+      iconBorder: "rgba(236,72,153,0.3)",
+      iconColor: "#F9A8D4",
+      topLine: "linear-gradient(90deg, transparent, #EC4899, transparent)",
+      valueGlow: "0 0 20px rgba(236,72,153,0.5)",
+      valueColor: "#FDF2F8",
+    },
+    amber: {
+      card: "rgba(245,158,11,0.06)",
+      border: "rgba(245,158,11,0.2)",
+      borderHover: "rgba(245,158,11,0.4)",
+      iconBg: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(180,83,9,0.1))",
+      iconBorder: "rgba(245,158,11,0.25)",
+      iconColor: "#FCD34D",
+      topLine: "linear-gradient(90deg, transparent, #F59E0B, transparent)",
+      valueGlow: "0 0 16px rgba(245,158,11,0.4)",
+      valueColor: "#FEF3C7",
+    },
+    teal: {
+      card: "rgba(20,184,166,0.06)",
+      border: "rgba(20,184,166,0.2)",
+      borderHover: "rgba(20,184,166,0.38)",
+      iconBg: "linear-gradient(135deg, rgba(20,184,166,0.2), rgba(13,148,136,0.1))",
+      iconBorder: "rgba(20,184,166,0.25)",
+      iconColor: "#5EEAD4",
+      topLine: "linear-gradient(90deg, transparent, #14B8A6, transparent)",
+      valueGlow: "0 0 16px rgba(20,184,166,0.4)",
+      valueColor: "#CCFBF1",
+    },
+  }[variant];
+
   return (
-    <div className="glass rounded-xl p-5 space-y-1 group relative">
-      <div className="flex items-start justify-between gap-1">
-        <p className="text-xs text-slate-400 uppercase tracking-wider font-medium leading-tight">{label}</p>
-        {/* Tooltip trigger */}
-        <span className="shrink-0 text-slate-700 hover:text-slate-400 transition-colors cursor-help text-[11px] leading-tight mt-px">?
-          <span className="pointer-events-none absolute z-20 left-1/2 -translate-x-1/2 top-full mt-2 w-48 rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-[11px] text-slate-300 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity text-left font-normal normal-case tracking-normal">
-            {tooltip}
-          </span>
-        </span>
+    <div
+      className={`kpi-card kpi-card-${variant} rounded-xl2 p-5 space-y-4 relative overflow-hidden cursor-default animate-fade-up`}
+      style={{
+        background: styles.card,
+        border: `1px solid ${styles.border}`,
+        backdropFilter: "blur(24px)",
+        animationDelay: delay,
+      }}
+      title={tooltip}
+    >
+      {/* Top gradient line */}
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: styles.topLine }} />
+
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: "rgba(228,216,255,0.5)" }}>{label}</p>
+        <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: styles.iconBg, border: `1px solid ${styles.iconBorder}`, color: styles.iconColor }}>
+          {icon}
+        </div>
       </div>
-      <p className={`text-3xl font-bold font-mono-id ${accentClass}`}>{value}</p>
-      {sub && <p className="text-xs text-slate-500">{sub}</p>}
+
+      <div>
+        <p className="text-3xl font-bold font-mono-id leading-none" style={{ color: styles.valueColor, textShadow: styles.valueGlow }}>
+          {value}
+        </p>
+        {sub && <p className="text-[11px] mt-1.5 leading-snug" style={{ color: "rgba(228,216,255,0.4)" }}>{sub}</p>}
+      </div>
     </div>
   );
 }
 
-const STATUS_BAR_COLOR: Record<string, string> = {
-  SUBMITTED:"bg-slate-500", EXTRACTING:"bg-blue-500", VALIDATING:"bg-violet-500",
-  PENDING_REVIEW:"bg-orange-500", APPROVED:"bg-emerald-500", REJECTED:"bg-red-600", ESCALATED:"bg-rose-500",
+// ── Status bars ──────────────────────────────────────────────────────────────
+
+const STATUS_BAR: Record<string, string> = {
+  SUBMITTED:      "linear-gradient(90deg, #6B7280, #9CA3AF)",
+  EXTRACTING:     "linear-gradient(90deg, #3B82F6, #60A5FA)",
+  VALIDATING:     "linear-gradient(90deg, #A855F7, #C084FC)",
+  PENDING_REVIEW: "linear-gradient(90deg, #F59E0B, #FCD34D)",
+  APPROVED:       "linear-gradient(90deg, #10B981, #34D399)",
+  REJECTED:       "linear-gradient(90deg, #EF4444, #F87171)",
+  ESCALATED:      "linear-gradient(90deg, #EC4899, #F9A8D4)",
 };
 
-const ACTOR_ICON: Record<string, string> = { AGENT:"🧠", ROBOT:"⚙️", HUMAN:"👤" };
+const ACTOR_META: Record<string, { symbol: string; color: string; bg: string; border: string }> = {
+  AGENT: { symbol: "✦", color: "#C084FC", bg: "rgba(168,85,247,0.15)", border: "rgba(168,85,247,0.3)" },
+  ROBOT: { symbol: "◆", color: "#5EEAD4", bg: "rgba(20,184,166,0.15)", border: "rgba(20,184,166,0.3)" },
+  HUMAN: { symbol: "●", color: "#FCD34D", bg: "rgba(245,158,11,0.15)", border: "rgba(245,158,11,0.3)" },
+};
 
-function relativeTime(iso: string): string {
-  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+function relativeTime(iso: string) {
+  const s = Math.floor((Date.now()-new Date(iso).getTime())/1000);
   if (s < 60) return `${s}s ago`;
   if (s < 3600) return `${Math.floor(s/60)}m ago`;
   if (s < 86400) return `${Math.floor(s/3600)}h ago`;
   return `${Math.floor(s/86400)}d ago`;
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Icons ────────────────────────────────────────────────────────────────────
+
+const IcoDoc  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>;
+const IcoBot  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M12 2v4"/><circle cx="12" cy="6" r="2"/></svg>;
+const IcoEye  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+const IcoClock= () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>;
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const [stats, allClaims, recentEvents] = [
-    fetchStats(),
-    getAllClaims(),
-    getRecentStageEvents(5),
-  ];
-
+  const [stats, allClaims, recentEvents] = [fetchStats(), getAllClaims(), getRecentStageEvents(6)];
   const statusCounts: Record<string, number> = {};
   for (const c of allClaims) statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
   const maxCount = Math.max(1, ...Object.values(statusCounts));
   const totalClaims = allClaims.length;
   const autoResolvedAll = allClaims.filter(c => c.status === "APPROVED").length;
 
+  const kpis: KpiConfig[] = [
+    { label: "Claims Today",    value: stats.total,            sub: "submitted since midnight",          icon: <IcoDoc />,   delay: "0ms",   variant: "purple", tooltip: "Claims created today" },
+    { label: "AI Resolved",     value: `${stats.autoApprovalRate}%`, sub: `${stats.approved} approved · ${stats.rejected} rejected`, icon: <IcoBot />,   delay: "60ms",  variant: "pink",   tooltip: "Auto-resolved by AI today" },
+    { label: "Pending Review",  value: stats.pending,          sub: "awaiting human decision",          icon: <IcoEye />,   delay: "120ms", variant: "amber",  tooltip: "Claims requiring human review" },
+    { label: "Avg. Processing", value: stats.avgProcessingTime > 0 ? `${stats.avgProcessingTime}m` : "—", sub: "intake → resolution", icon: <IcoClock />, delay: "180ms", variant: "teal",   tooltip: "Average processing time today" },
+  ];
+
+  const HEADER_STYLE = {
+    background: "rgba(8,5,15,0.92)",
+    backdropFilter: "blur(24px)",
+    borderBottom: "1px solid rgba(168,85,247,0.12)",
+  };
+
+  const CARD_STYLE = {
+    background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(124,58,237,0.04) 100%)",
+    border: "1px solid rgba(168,85,247,0.18)",
+    backdropFilter: "blur(24px)",
+  };
+
   return (
-    <div className="min-h-screen bg-[#0F1117]">
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">AC</div>
-            <span className="font-semibold text-slate-100 text-sm tracking-tight">AutoClaim <span className="text-emerald-400">AI</span></span>
-            <span className="hidden sm:inline-flex items-center rounded-full border border-violet-700 bg-violet-950 px-2 py-0.5 text-[10px] font-medium text-violet-300 ml-2">
-              UiPath AgentHack 2026
-            </span>
-          </div>
-          <nav className="flex items-center gap-2">
-            <Link href="/claims/new" className="rounded-lg bg-emerald-500 hover:bg-emerald-400 transition-colors px-3 py-1.5 text-xs font-semibold text-white">
-              + New Claim
-            </Link>
-            <Link href="/review" className="rounded-lg border border-white/10 hover:border-orange-500/50 hover:bg-orange-950/30 transition-colors px-3 py-1.5 text-xs font-medium text-slate-300">
-              Review Queue {stats.pending > 0 && <span className="ml-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{stats.pending}</span>}
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen">
+      <TopBar
+        title="Dashboard"
+        subtitle="Powered by Claude AI & UiPath Maestro"
+        pending={stats.pending}
+      />
 
       <main className="mx-auto max-w-7xl px-6 py-8 space-y-8">
-        {/* KPI row */}
+
+        {/* ── KPIs ── */}
         <section>
-          <h2 className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">Today&apos;s Overview</h2>
+          <p className="text-[10px] uppercase tracking-widest font-semibold mb-4" style={{ color: "rgba(168,85,247,0.45)" }}>
+            Today&apos;s Overview
+          </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard label="Total Claims Today" value={stats.total}
-              sub="submitted since midnight" accent="emerald"
-              tooltip="Claims created today (since midnight local time). Includes all statuses." />
-            <KpiCard label="Auto-Resolved" value={`${stats.autoApprovalRate}%`}
-              sub={`${stats.approved} approved, ${stats.rejected} rejected`} accent="violet"
-              tooltip="Share of today's resolved claims approved automatically by AI — with no human decision event in their timeline." />
-            <KpiCard label="Pending Review" value={stats.pending}
-              sub="awaiting human decision" accent="orange"
-              tooltip="Open claims currently in PENDING_REVIEW or ESCALATED status across all days. Human action required." />
-            <KpiCard label="Avg. Processing" value={stats.avgProcessingTime > 0 ? `${stats.avgProcessingTime}m` : "—"}
-              sub="intake → resolution" accent="rose"
-              tooltip="Average minutes from claim creation to final resolution (APPROVED or REJECTED) for claims resolved today." />
+            {kpis.map(kpi => <KpiCard key={kpi.label} {...kpi} />)}
           </div>
         </section>
 
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* Recent Activity (server) */}
-          <section className="lg:col-span-2 glass rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-slate-200">Recent Activity</h2>
-              <Link href="/claims" className="text-xs text-emerald-400 hover:underline">View all →</Link>
+        {/* ── Activity + Feed ── */}
+        <div className="grid lg:grid-cols-5 gap-5 animate-fade-up-2">
+          {/* Recent Activity */}
+          <section className="lg:col-span-2 rounded-xl2 p-5" style={CARD_STYLE}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold" style={{ color: "#FAF5FF" }}>Recent Activity</h2>
+                <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "#A855F7" }} />
+              </div>
+              <Link href="/claims" className="text-[11px] font-medium transition-colors"
+                style={{ color: "#A855F7" }}>View all →</Link>
             </div>
-            <ol className="space-y-3">
+            <ol className="space-y-4">
               {recentEvents.length === 0 && (
-                <li className="text-xs text-slate-500 py-4 text-center">No activity yet</li>
+                <li className="text-xs py-6 text-center" style={{ color: "rgba(168,85,247,0.35)" }}>No activity yet</li>
               )}
-              {recentEvents.map((ev) => (
-                <li key={ev.id} className="flex items-start gap-3 text-xs">
-                  <span className="mt-0.5 text-sm">{ACTOR_ICON[ev.actor] ?? "•"}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-slate-200 truncate">
-                      <span className="font-semibold">{ev.claimantName}</span>
-                      {" — "}<span className="text-slate-400">{ev.stage.replace(/_/g," ")}</span>
-                    </p>
-                    {ev.notes && <p className="text-slate-500 truncate mt-0.5">{ev.notes}</p>}
-                  </div>
-                  <time className="shrink-0 text-slate-600 font-mono-id tabular-nums" suppressHydrationWarning>{relativeTime(ev.timestamp)}</time>
-                </li>
-              ))}
+              {recentEvents.map((ev, i) => {
+                const actor = ACTOR_META[ev.actor] ?? { symbol: "·", color: "#6B7280", bg: "rgba(107,114,128,0.1)", border: "rgba(107,114,128,0.2)" };
+                return (
+                  <li key={ev.id} className="flex items-start gap-3 text-xs animate-fade-up" style={{ animationDelay: `${i*40}ms` }}>
+                    <div className="mt-0.5 h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
+                      style={{ background: actor.bg, border: `1px solid ${actor.border}`, color: actor.color }}>
+                      {actor.symbol}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate leading-snug" style={{ color: "#E9D5FF" }}>
+                        <span className="font-semibold">{ev.claimantName}</span>
+                        <span className="mx-1" style={{ color: "rgba(168,85,247,0.3)" }}>·</span>
+                        <span style={{ color: "rgba(228,216,255,0.45)" }}>{ev.stage.replace(/_/g," ")}</span>
+                      </p>
+                      {ev.notes && <p className="truncate mt-0.5 text-[11px]" style={{ color: "rgba(168,85,247,0.35)" }}>{ev.notes}</p>}
+                    </div>
+                    <time className="shrink-0 font-mono-id tabular-nums text-[10px] pt-0.5" style={{ color: "rgba(168,85,247,0.3)" }} suppressHydrationWarning>
+                      {relativeTime(ev.timestamp)}
+                    </time>
+                  </li>
+                );
+              })}
             </ol>
           </section>
 
-          {/* Live Feed (client — auto-refreshes every 5s) */}
+          {/* Live Feed */}
           <div className="lg:col-span-3">
             <LiveFeed />
           </div>
         </div>
 
-        {/* Claims by Status + all-time row */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          <section className="lg:col-span-2 glass rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-slate-200">Claims by Status</h2>
-              <span className="text-xs text-slate-500">{totalClaims} total</span>
+        {/* ── Status + All-time ── */}
+        <div className="grid lg:grid-cols-3 gap-5 animate-fade-up-3">
+          <section className="lg:col-span-2 rounded-xl2 p-5" style={CARD_STYLE}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold" style={{ color: "#FAF5FF" }}>Claims by Status</h2>
+              <span className="text-[11px] font-mono-id" style={{ color: "rgba(168,85,247,0.45)" }}>{totalClaims} total</span>
             </div>
-            <ul className="space-y-2.5">
-              {(["APPROVED","PENDING_REVIEW","ESCALATED","VALIDATING","EXTRACTING","SUBMITTED","REJECTED"] as ClaimStatus[]).map((st) => {
-                const count  = statusCounts[st] ?? 0;
-                const pct    = Math.round((count / Math.max(1,totalClaims)) * 100);
-                const barPct = Math.round((count / maxCount) * 100);
+            <ul className="space-y-3">
+              {(["APPROVED","PENDING_REVIEW","ESCALATED","VALIDATING","EXTRACTING","SUBMITTED","REJECTED"] as ClaimStatus[]).map(st => {
+                const count = statusCounts[st] ?? 0;
+                const pct   = Math.round((count/Math.max(1,totalClaims))*100);
+                const barPct= Math.round((count/maxCount)*100);
                 return (
-                  <li key={st}>
-                    <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="text-slate-400">{st.replace(/_/g," ")}</span>
-                      <span className="font-mono-id text-slate-300 tabular-nums">{count} <span className="text-slate-600">({pct}%)</span></span>
+                  <li key={st} className="group">
+                    <div className="flex items-center justify-between text-[11px] mb-1.5">
+                      <span className="font-medium" style={{ color: "rgba(228,216,255,0.55)" }}>{st.replace(/_/g," ")}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono-id" style={{ color: "rgba(168,85,247,0.4)" }}>{pct}%</span>
+                        <span className="font-mono-id font-semibold" style={{ color: count > 0 ? "#E9D5FF" : "rgba(168,85,247,0.25)" }}>{count}</span>
+                      </div>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-700 ${STATUS_BAR_COLOR[st] ?? "bg-slate-500"}`} style={{ width:`${barPct}%` }} />
+                    <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(168,85,247,0.08)" }}>
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{ width:`${barPct}%`, background: STATUS_BAR[st] ?? "linear-gradient(90deg,#6B7280,#9CA3AF)" }} />
                     </div>
                   </li>
                 );
@@ -199,35 +284,48 @@ export default function DashboardPage() {
             </ul>
           </section>
 
-          <section className="glass rounded-xl p-5 flex flex-col justify-between">
-            <h2 className="text-sm font-semibold text-slate-200 mb-3">All-Time</h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Auto-Resolved</p>
-                <p className="text-3xl font-bold font-mono-id text-emerald-400">{autoResolvedAll}</p>
+          <section className="rounded-xl2 p-5 flex flex-col" style={CARD_STYLE}>
+            <h2 className="text-sm font-semibold mb-5" style={{ color: "#FAF5FF" }}>All-Time</h2>
+            <div className="space-y-4 flex-1">
+              <div className="p-4 rounded-xl" style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.2)" }}>
+                <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: "rgba(168,85,247,0.6)" }}>AI Resolved</p>
+                <p className="text-4xl font-bold font-mono-id leading-none" style={{ color: "#E9D5FF", textShadow: "0 0 20px rgba(168,85,247,0.5)" }}>{autoResolvedAll}</p>
+                <p className="text-[11px] mt-1.5" style={{ color: "rgba(168,85,247,0.45)" }}>claims processed by AI</p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Total Claims</p>
-                <p className="text-3xl font-bold font-mono-id text-slate-300">{totalClaims}</p>
+              <div className="p-4 rounded-xl" style={{ background: "rgba(236,72,153,0.07)", border: "1px solid rgba(236,72,153,0.18)" }}>
+                <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: "rgba(236,72,153,0.6)" }}>Total Claims</p>
+                <p className="text-4xl font-bold font-mono-id leading-none" style={{ color: "#FDF2F8", textShadow: "0 0 20px rgba(236,72,153,0.4)" }}>{totalClaims}</p>
+                <p className="text-[11px] mt-1.5" style={{ color: "rgba(236,72,153,0.4)" }}>ever submitted</p>
               </div>
             </div>
-            <Link href="/claims" className="mt-4 text-xs text-slate-500 hover:text-slate-300 transition-colors">
-              Browse all →
-            </Link>
+            <Link href="/claims" className="mt-5 text-[11px] font-medium transition-colors"
+              style={{ color: "rgba(168,85,247,0.45)" }}>Browse all claims →</Link>
           </section>
         </div>
 
-        {/* CTAs */}
-        <section className="flex flex-wrap gap-3">
-          <Link href="/claims/new" className="flex items-center gap-2 rounded-xl border border-emerald-700/50 bg-emerald-950/40 hover:bg-emerald-950/70 transition-colors px-5 py-3 text-sm font-semibold text-emerald-300">
-            <span>⚡</span> Submit New Claim
+        {/* ── CTAs ── */}
+        <section className="flex flex-wrap gap-3 pb-4 animate-fade-up-4">
+          <Link href="/claims/new"
+            className="flex items-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200"
+            style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.2), rgba(124,58,237,0.12))", border: "1px solid rgba(168,85,247,0.3)", color: "#C084FC" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Submit New Claim
           </Link>
-          <Link href="/review" className="flex items-center gap-2 rounded-xl border border-orange-700/50 bg-orange-950/40 hover:bg-orange-950/70 transition-colors px-5 py-3 text-sm font-semibold text-orange-300">
-            <span>👁</span> Review Queue
-            {stats.pending > 0 && <span className="rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{stats.pending}</span>}
+          <Link href="/review"
+            className="flex items-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200"
+            style={{ background: "rgba(236,72,153,0.1)", border: "1px solid rgba(236,72,153,0.25)", color: "#F9A8D4" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Review Queue
+            {stats.pending > 0 && (
+              <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #EC4899, #DB2777)" }}>{stats.pending}</span>
+            )}
           </Link>
-          <Link href="/claims" className="flex items-center gap-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors px-5 py-3 text-sm font-medium text-slate-400">
-            All Claims →
+          <Link href="/claims"
+            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition-all duration-200"
+            style={{ background: "rgba(168,85,247,0.05)", border: "1px solid rgba(168,85,247,0.12)", color: "rgba(196,181,253,0.6)" }}>
+            All Claims
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
         </section>
       </main>
