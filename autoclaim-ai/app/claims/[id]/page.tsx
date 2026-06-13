@@ -150,33 +150,34 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
   const isResolved    = claim.status === "APPROVED" || claim.status === "REJECTED";
 
   return (
-    <div className="min-h-screen bg-[#0F1117]">
-      {/* Confetti fires client-side when resolved */}
+    <div className="min-h-screen">
       <ConfettiBurst trigger={isResolved} />
 
       {/* ── Hackathon banner ── */}
-      <div className="bg-gradient-to-r from-violet-950 via-violet-900 to-emerald-950 border-b border-violet-800/40 px-6 py-2 flex items-center justify-center gap-2">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 text-yellow-400">
+      <div className="px-6 py-2 flex items-center justify-center gap-2"
+        style={{ background:"linear-gradient(90deg,rgba(124,58,237,0.4),rgba(168,85,247,0.3),rgba(236,72,153,0.2))", borderBottom:"1px solid rgba(168,85,247,0.2)" }}>
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ color:"#FCD34D" }}>
           <path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4L2 5h4L8 1Z" fill="currentColor"/>
         </svg>
-        <span className="text-[11px] font-semibold text-violet-200 tracking-wide uppercase">
-          UiPath AgentHack 2026
-        </span>
-        <span className="text-violet-600 text-[11px]">·</span>
-        <span className="text-[11px] text-violet-400">Track 1: Maestro Case</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color:"#E9D5FF" }}>UiPath AgentHack 2026</span>
+        <span className="text-[11px]" style={{ color:"rgba(168,85,247,0.4)" }}>·</span>
+        <span className="text-[11px]" style={{ color:"rgba(196,132,252,0.7)" }}>Track 1: Maestro Case Orchestration</span>
       </div>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 glass border-b border-white/[0.06]">
+      <header className="sticky top-0 z-40" style={{ background:"rgba(10,5,20,0.92)", backdropFilter:"blur(24px)", borderBottom:"1px solid rgba(168,85,247,0.14)" }}>
+        <div className="absolute top-0 left-0 right-0 h-px" style={{ background:"linear-gradient(90deg,transparent,rgba(168,85,247,0.5),rgba(236,72,153,0.4),transparent)" }} />
         <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-500 to-violet-600 flex items-center justify-center text-white font-bold text-[10px]">AC</div>
+            <Link href="/" className="flex items-center gap-1.5 group">
+              <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background:"linear-gradient(135deg,#A855F7,#7C3AED,#EC4899)", boxShadow:"0 0 8px rgba(168,85,247,0.4)" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-6 2 12 2-8 1 4h5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
             </Link>
-            <span className="text-slate-700">/</span>
-            <Link href="/claims" className="text-slate-400 hover:text-slate-200 transition-colors">Claims</Link>
-            <span className="text-slate-700">/</span>
-            <span className="font-mono-id text-slate-500 text-xs">{claim.id.slice(0, 8)}…</span>
+            <span style={{ color:"rgba(168,85,247,0.3)" }}>/</span>
+            <Link href="/claims" className="text-xs transition-colors" style={{ color:"rgba(196,132,252,0.6)" }}>Claims</Link>
+            <span style={{ color:"rgba(168,85,247,0.3)" }}>/</span>
+            <span className="font-mono-id text-xs" style={{ color:"rgba(168,85,247,0.5)" }}>{claim.id.slice(0, 8)}…</span>
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge status={claim.status} />
@@ -187,13 +188,14 @@ export default async function ClaimDetailPage({ params }: { params: { id: string
 
       <main className="mx-auto max-w-7xl px-6 py-8">
         {/* ── Title row ── */}
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3 animate-fade-up">
           <div>
-            <h1 className="text-xl font-semibold text-slate-100">{claim.claimantName}</h1>
-            <p className="font-mono-id text-xs text-slate-500 mt-0.5">{claim.policyNumber}</p>
+            <h1 className="text-xl font-bold" style={{ color:"#FAF5FF" }}>{claim.claimantName}</h1>
+            <p className="font-mono-id text-xs mt-0.5" style={{ color:"rgba(168,85,247,0.4)" }}>{claim.policyNumber}</p>
           </div>
-          <span className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${SOURCE_COLORS[claim.source] ?? SOURCE_COLORS["FORM"]}`}>
-            {claim.source}
+          <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold"
+            style={{ background:"rgba(168,85,247,0.1)", border:"1px solid rgba(168,85,247,0.25)", color:"rgba(196,132,252,0.8)" }}>
+            via {claim.source}
           </span>
         </div>
 

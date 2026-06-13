@@ -4,212 +4,212 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Claim, Reviewer } from "@/lib/types";
 
-interface ReviewPanelProps {
-  claim: Claim;
-  reviewer: Reviewer | null;
-}
-
+interface ReviewPanelProps { claim: Claim; reviewer: Reviewer | null; }
 type Decision = "APPROVE" | "REJECT" | "ESCALATE" | "REQUEST_MORE_INFO";
 
-const DECISION_CONFIG: Record<Decision, { label: string; color: string; icon: string }> = {
-  APPROVE:           { label: "Approve",      color: "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600",    icon: "✓" },
-  REJECT:            { label: "Reject",        color: "bg-red-700    hover:bg-red-600     text-white border-red-700",         icon: "✗" },
-  ESCALATE:          { label: "Escalate",      color: "bg-rose-900   hover:bg-rose-800    text-rose-200 border-rose-700",     icon: "↑" },
-  REQUEST_MORE_INFO: { label: "Request Info",  color: "bg-amber-900  hover:bg-amber-800   text-amber-200 border-amber-700",   icon: "?" },
-};
+const DECISIONS: { key: Decision; label: string; icon: React.ReactNode; style: { bg:string; border:string; color:string; activeBg:string; activeColor:string } }[] = [
+  {
+    key: "APPROVE", label: "Approve",
+    icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
+    style: { bg:"rgba(16,185,129,0.08)", border:"rgba(16,185,129,0.2)", color:"#6EE7B7", activeBg:"rgba(16,185,129,0.25)", activeColor:"#34D399" },
+  },
+  {
+    key: "REJECT", label: "Reject",
+    icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+    style: { bg:"rgba(239,68,68,0.08)", border:"rgba(239,68,68,0.2)", color:"#FCA5A5", activeBg:"rgba(239,68,68,0.25)", activeColor:"#F87171" },
+  },
+  {
+    key: "ESCALATE", label: "Escalate",
+    icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>,
+    style: { bg:"rgba(236,72,153,0.08)", border:"rgba(236,72,153,0.2)", color:"#F9A8D4", activeBg:"rgba(236,72,153,0.25)", activeColor:"#F472B6" },
+  },
+  {
+    key: "REQUEST_MORE_INFO", label: "Request Info",
+    icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>,
+    style: { bg:"rgba(245,158,11,0.08)", border:"rgba(245,158,11,0.2)", color:"#FCD34D", activeBg:"rgba(245,158,11,0.2)", activeColor:"#FDE047" },
+  },
+];
 
 function fmtAmount(amount: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0}).format(amount);
 }
 
-// ── Resolved state display ────────────────────────────────────────────────────
-
 function ResolutionCard({ claim }: { claim: Claim }) {
-  const isApproved = claim.status === "APPROVED";
-  const cfg = {
-    bg: isApproved ? "bg-emerald-950 border-emerald-800" : "bg-red-950 border-red-800",
-    title: isApproved ? "text-emerald-300" : "text-red-300",
-    icon: isApproved ? "✓" : "✗",
-    label: isApproved ? "Approved" : "Rejected",
-  };
-
+  const ok = claim.status === "APPROVED";
   return (
-    <div className={`rounded-xl border p-5 space-y-3 ${cfg.bg}`}>
-      <div className="flex items-center gap-2">
-        <span className={`text-2xl font-bold ${cfg.title}`}>{cfg.icon}</span>
+    <div className="rounded-xl p-5 space-y-3" style={{
+      background: ok ? "rgba(16,185,129,0.08)"  : "rgba(239,68,68,0.08)",
+      border:     ok ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(239,68,68,0.25)",
+      backdropFilter:"blur(20px)",
+    }}>
+      <div className="flex items-center gap-2.5">
+        <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-lg"
+          style={{ background: ok ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)", color: ok ? "#34D399" : "#F87171" }}>
+          {ok ? "✓" : "✗"}
+        </div>
         <div>
-          <p className={`text-sm font-bold ${cfg.title}`}>Claim {cfg.label}</p>
+          <p className="text-sm font-bold" style={{ color: ok ? "#6EE7B7" : "#FCA5A5" }}>
+            Claim {ok ? "Approved" : "Rejected"}
+          </p>
           {claim.resolvedAt && (
-            <p className="text-xs text-slate-500">
-              {new Date(claim.resolvedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+            <p className="text-xs" style={{ color:"rgba(168,85,247,0.5)" }}>
+              {new Date(claim.resolvedAt).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
             </p>
           )}
         </div>
       </div>
       {claim.reviewNotes && (
         <div>
-          <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-1">Reviewer notes</p>
-          <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{claim.reviewNotes}</p>
+          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color:"rgba(168,85,247,0.5)" }}>Reviewer notes</p>
+          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color:"rgba(228,216,255,0.65)" }}>{claim.reviewNotes}</p>
         </div>
       )}
     </div>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
 export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
   const router = useRouter();
-  const [decision, setDecision] = useState<Decision | null>(null);
-  const [notes, setNotes] = useState("");
-  const [adjustedAmount, setAdjustedAmount] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [decision,        setDecision]        = useState<Decision | null>(null);
+  const [notes,           setNotes]           = useState("");
+  const [adjustedAmount,  setAdjustedAmount]  = useState("");
+  const [submitting,      setSubmitting]      = useState(false);
+  const [error,           setError]           = useState<string | null>(null);
   const notesRef = useRef<HTMLTextAreaElement>(null);
 
-  if (claim.status === "APPROVED" || claim.status === "REJECTED") {
-    return <ResolutionCard claim={claim} />;
-  }
+  if (claim.status === "APPROVED" || claim.status === "REJECTED") return <ResolutionCard claim={claim} />;
 
-  const canSubmit =
-    decision !== null &&
-    notes.trim().length >= 10 &&
-    !submitting;
+  const canSubmit = decision !== null && notes.trim().length >= 10 && !submitting;
 
   const submit = async () => {
     if (!decision || !reviewer) return;
-    setError(null);
-    setSubmitting(true);
-
+    setError(null); setSubmitting(true);
     try {
-      const body: Record<string, unknown> = {
-        decision,
-        reviewerId: reviewer.id,
-        notes: notes.trim(),
-      };
+      const body: Record<string, unknown> = { decision, reviewerId: reviewer.id, notes: notes.trim() };
       if (adjustedAmount.trim()) {
-        const amt = parseFloat(adjustedAmount.replace(/[^0-9.]/g, ""));
+        const amt = parseFloat(adjustedAmount.replace(/[^0-9.]/g,""));
         if (!isNaN(amt) && amt > 0) body.adjustedAmount = amt;
       }
-
-      const res = await fetch(`/api/review/${claim.id}/decision`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
+      const res  = await fetch(`/api/review/${claim.id}/decision`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error ?? `Request failed (${res.status})`);
-
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
+  const CARD = {
+    background:"linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(124,58,237,0.04) 100%)",
+    border:"1px solid rgba(168,85,247,0.18)", backdropFilter:"blur(24px)",
+  };
+
+  const activeDecision = DECISIONS.find(d => d.key === decision);
+
   return (
-    <div className="glass rounded-xl border border-white/[0.08] p-5 space-y-5">
-      {/* Reviewer info */}
+    <div className="rounded-xl p-5 space-y-5" style={CARD}>
+      {/* Reviewer */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Assigned Reviewer</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"rgba(168,85,247,0.5)" }}>Assigned Reviewer</p>
         {reviewer ? (
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-full bg-violet-900 border border-violet-700 flex items-center justify-center text-sm">
-              {reviewer.name.slice(0, 1)}
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm"
+              style={{ background:"rgba(168,85,247,0.2)", border:"1px solid rgba(168,85,247,0.35)", color:"#C084FC" }}>
+              {reviewer.name.slice(0,1)}
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-200">{reviewer.name}</p>
-              <p className="text-xs text-slate-500">{reviewer.role}</p>
+              <p className="text-sm font-semibold" style={{ color:"#E9D5FF" }}>{reviewer.name}</p>
+              <p className="text-xs" style={{ color:"rgba(168,85,247,0.5)" }}>{reviewer.role}</p>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-slate-600 italic">Unassigned</p>
+          <p className="text-xs italic" style={{ color:"rgba(168,85,247,0.35)" }}>Unassigned</p>
         )}
       </div>
 
-      {/* Original amount reference */}
-      <div className="rounded-lg bg-slate-900 border border-white/[0.06] px-3 py-2.5 flex items-center justify-between">
-        <span className="text-xs text-slate-500">Claimed amount</span>
-        <span className="font-mono-id text-sm font-bold text-emerald-400">
+      {/* Amount */}
+      <div className="rounded-xl px-4 py-3 flex items-center justify-between"
+        style={{ background:"rgba(168,85,247,0.06)", border:"1px solid rgba(168,85,247,0.14)" }}>
+        <span className="text-xs" style={{ color:"rgba(168,85,247,0.55)" }}>Claimed amount</span>
+        <span className="font-mono-id text-sm font-bold" style={{ color:"#C084FC" }}>
           {fmtAmount(claim.claimAmount, claim.currency)}
         </span>
       </div>
 
       {/* Decision buttons */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Decision</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"rgba(168,85,247,0.5)" }}>Decision</p>
         <div className="grid grid-cols-2 gap-2">
-          {(Object.entries(DECISION_CONFIG) as [Decision, typeof DECISION_CONFIG[Decision]][]).map(([key, cfg]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setDecision(decision === key ? null : key)}
-              className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
-                decision === key
-                  ? cfg.color + " ring-1 ring-white/20"
-                  : "border-white/10 bg-slate-900 text-slate-400 hover:border-white/20"
-              }`}
-            >
-              <span>{cfg.icon}</span> {cfg.label}
-            </button>
-          ))}
+          {DECISIONS.map(d => {
+            const active = decision === d.key;
+            return (
+              <button key={d.key} type="button" onClick={() => setDecision(active ? null : d.key)}
+                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200"
+                style={{
+                  background: active ? d.style.activeBg : d.style.bg,
+                  border: `1px solid ${active ? d.style.activeColor : d.style.border}`,
+                  color: active ? d.style.activeColor : d.style.color,
+                  boxShadow: active ? `0 0 12px ${d.style.activeBg}` : "none",
+                }}>
+                {d.icon} {d.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Notes */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-1.5 block">
-          Notes <span className="text-rose-500">*</span>
+        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"rgba(168,85,247,0.5)" }}>
+          Notes <span style={{ color:"#EC4899" }}>*</span>
         </label>
-        <textarea
-          ref={notesRef}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Explain your decision (min. 10 characters)…"
-          rows={3}
-          className="w-full rounded-lg border border-white/10 bg-slate-900 text-sm text-slate-200 placeholder:text-slate-600 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-violet-500 resize-none"
-        />
-        <p className={`mt-1 text-[10px] text-right transition-colors ${notes.trim().length >= 10 ? "text-slate-600" : "text-slate-500"}`}>
+        <textarea ref={notesRef} value={notes} onChange={e => setNotes(e.target.value)}
+          placeholder="Explain your decision (min. 10 characters)…" rows={3}
+          className="w-full rounded-xl text-sm px-3 py-2 focus:outline-none resize-none transition-all duration-200"
+          style={{ background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.2)", color:"#E9D5FF" }} />
+        <p className="mt-1 text-[10px] text-right transition-colors"
+          style={{ color: notes.trim().length >= 10 ? "rgba(168,85,247,0.5)" : "rgba(236,72,153,0.5)" }}>
           {notes.trim().length}/10 min
         </p>
       </div>
 
-      {/* Adjusted amount (optional) */}
+      {/* Adjusted amount */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-1.5 block">
-          Adjusted Amount <span className="text-slate-600">(optional)</span>
+        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"rgba(168,85,247,0.5)" }}>
+          Adjusted Amount <span style={{ color:"rgba(168,85,247,0.35)" }}>(optional)</span>
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
-          <input
-            type="text"
-            value={adjustedAmount}
-            onChange={(e) => setAdjustedAmount(e.target.value)}
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color:"rgba(168,85,247,0.5)" }}>$</span>
+          <input type="text" value={adjustedAmount} onChange={e => setAdjustedAmount(e.target.value)}
             placeholder={String(claim.claimAmount)}
-            className="w-full rounded-lg border border-white/10 bg-slate-900 text-sm text-slate-200 placeholder:text-slate-600 pl-6 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-violet-500"
-          />
+            className="w-full rounded-xl text-sm pl-6 pr-3 py-2 focus:outline-none transition-all"
+            style={{ background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.2)", color:"#E9D5FF" }} />
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <p className="rounded-lg border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-300">{error}</p>
+        <div className="rounded-xl px-3 py-2.5 text-xs" style={{ background:"rgba(236,72,153,0.1)", border:"1px solid rgba(236,72,153,0.3)", color:"#F9A8D4" }}>
+          {error}
+        </div>
       )}
 
       {/* Submit */}
-      <button
-        type="button"
-        onClick={submit}
-        disabled={!canSubmit}
-        className="w-full rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors px-4 py-2.5 text-sm font-semibold text-white"
-      >
-        {submitting ? "Submitting…" : decision ? `Submit — ${DECISION_CONFIG[decision].label}` : "Select a decision"}
+      <button type="button" onClick={submit} disabled={!canSubmit}
+        className="w-full rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+        style={canSubmit && activeDecision ? {
+          background:`linear-gradient(135deg,${activeDecision.style.activeBg},${activeDecision.style.bg})`,
+          border:`1px solid ${activeDecision.style.activeColor}`,
+          color: activeDecision.style.activeColor,
+          boxShadow:`0 0 16px ${activeDecision.style.activeBg}`,
+        } : {
+          background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.18)", color:"rgba(196,132,252,0.5)",
+        }}>
+        {submitting ? "Submitting…" : decision ? `Submit — ${DECISIONS.find(d=>d.key===decision)?.label}` : "Select a decision"}
       </button>
 
       {!reviewer && (
-        <p className="text-[10px] text-amber-500 text-center">⚠ No reviewer assigned — submission blocked</p>
+        <p className="text-[10px] text-center" style={{ color:"#FCD34D" }}>⚠ No reviewer assigned — submission blocked</p>
       )}
     </div>
   );
