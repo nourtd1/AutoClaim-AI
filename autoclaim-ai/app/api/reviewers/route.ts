@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { initDb, getAllReviewers } from "@/lib/db";
 
-initDb();
-
-// GET /api/reviewers
 export async function GET() {
+  await initDb();
   try {
-    const reviewers = getAllReviewers();
+    const reviewers = await getAllReviewers();
     return NextResponse.json({ data: reviewers, error: null });
   } catch (err) {
     console.error("[GET /api/reviewers]", err);

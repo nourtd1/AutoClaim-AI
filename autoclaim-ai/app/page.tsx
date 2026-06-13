@@ -5,7 +5,6 @@ import type { ClaimStatus } from "@/lib/types";
 import LiveFeed from "./dashboard/LiveFeed";
 import TopBar from "@/components/TopBar";
 
-initDb();
 export const metadata: Metadata = { title: "Dashboard" };
 
 interface DashboardStats {
@@ -14,21 +13,38 @@ interface DashboardStats {
   avgProcessingTime: number; autoApprovalRate: number;
 }
 
-function fetchStats(): DashboardStats {
+async function fetchStats(): Promise<DashboardStats> {
+  await initDb();
   const db = getDb();
   const s = new Date(); s.setHours(0, 0, 0, 0);
   const start = s.toISOString(), end = new Date().toISOString();
+
   type CR = { cnt: number }; type AR = { avg_minutes: number | null };
-  const total    = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE createdAt>=? AND createdAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
-  const approved = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
-  const rejected = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status='REJECTED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
-  const escalated= (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status='ESCALATED' AND updatedAt>=? AND updatedAt<=? AND deletedAt IS NULL`).get(start,end) as CR).cnt;
-  const pending  = (db.prepare(`SELECT COUNT(*) as cnt FROM claims WHERE status IN ('PENDING_REVIEW','ESCALATED') AND deletedAt IS NULL`).get() as CR).cnt;
-  const avgRow   = db.prepare(`SELECT AVG((julianday(resolvedAt)-julianday(createdAt))*1440) as avg_minutes FROM claims WHERE resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).get(start,end) as AR;
-  const avgProcessingTime = Math.round(avgRow.avg_minutes ?? 0);
-  const approvedIds = (db.prepare(`SELECT id FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`).all(start,end) as {id:string}[]).map(r=>r.id);
+
+  const [totalR, approvedR, rejectedR, escalatedR, pendingR, avgR] = await Promise.all([
+    db.execute({ sql:`SELECT COUNT(*) as cnt FROM claims WHERE createdAt>=? AND createdAt<=? AND deletedAt IS NULL`, args:[start,end] }),
+    db.execute({ sql:`SELECT COUNT(*) as cnt FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args:[start,end] }),
+    db.execute({ sql:`SELECT COUNT(*) as cnt FROM claims WHERE status='REJECTED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args:[start,end] }),
+    db.execute({ sql:`SELECT COUNT(*) as cnt FROM claims WHERE status='ESCALATED' AND updatedAt>=? AND updatedAt<=? AND deletedAt IS NULL`, args:[start,end] }),
+    db.execute({ sql:`SELECT COUNT(*) as cnt FROM claims WHERE status IN ('PENDING_REVIEW','ESCALATED') AND deletedAt IS NULL`, args:[] }),
+    db.execute({ sql:`SELECT AVG((julianday(resolvedAt)-julianday(createdAt))*1440) as avg_minutes FROM claims WHERE resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args:[start,end] }),
+  ]);
+
+  const total    = Number((totalR.rows[0] as unknown as CR).cnt);
+  const approved = Number((approvedR.rows[0] as unknown as CR).cnt);
+  const rejected = Number((rejectedR.rows[0] as unknown as CR).cnt);
+  const escalated= Number((escalatedR.rows[0] as unknown as CR).cnt);
+  const pending  = Number((pendingR.rows[0] as unknown as CR).cnt);
+  const avgProcessingTime = Math.round(Number((avgR.rows[0] as unknown as AR).avg_minutes ?? 0));
+
+  const approvedIdsR = await db.execute({ sql:`SELECT id FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args:[start,end] });
+  const approvedIds = approvedIdsR.rows.map(r => (r as unknown as {id:string}).id);
+
   let autoApproved = 0;
-  for (const id of approvedIds) if (!db.prepare(`SELECT 1 FROM stage_events WHERE claimId=? AND actor='HUMAN' LIMIT 1`).get(id)) autoApproved++;
+  if (approvedIds.length > 0) {
+    const humanR = await db.execute({ sql:`SELECT COUNT(DISTINCT claimId) as cnt FROM stage_events WHERE actor='HUMAN' AND claimId IN (${approvedIds.map(()=>"?").join(",")})`, args:approvedIds });
+    autoApproved = approvedIds.length - Number((humanR.rows[0] as unknown as CR).cnt);
+  }
   const autoApprovalRate = approved > 0 ? Math.round((autoApproved/approved)*100) : 0;
   return { total, approved, rejected, escalated, pending, avgProcessingTime, autoApprovalRate };
 }
@@ -159,8 +175,9 @@ const IcoClock= () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DashboardPage() {
-  const [stats, allClaims, recentEvents] = [fetchStats(), getAllClaims(), getRecentStageEvents(6)];
+export default async function DashboardPage() {
+  await initDb();
+  const [stats, allClaims, recentEvents] = await Promise.all([fetchStats(), getAllClaims(), getRecentStageEvents(6)]);
   const statusCounts: Record<string, number> = {};
   for (const c of allClaims) statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
   const maxCount = Math.max(1, ...Object.values(statusCounts));

@@ -11,10 +11,9 @@ import ProcessingBanner from "@/components/ui/ProcessingBanner";
 import ConfettiBurst from "@/components/ui/ConfettiBurst";
 import ClaimPageLiveWrapper from "@/components/ClaimPageLiveWrapper";
 
-initDb();
-
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const claim = getClaimById(params.id);
+  await initDb();
+  const claim = await getClaimById(params.id);
   if (!claim) return { title: "Claim Not Found" };
   return { title: `${claim.claimantName} — ${claim.policyNumber}` };
 }
@@ -135,12 +134,13 @@ function Section({ title, badge, children }: { title: string; badge?: React.Reac
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ClaimDetailPage({ params }: { params: { id: string } }) {
-  const claim: Claim | null = getClaimById(params.id);
+  await initDb();
+  const claim: Claim | null = await getClaimById(params.id);
   if (!claim) notFound();
 
   const [timeline, reviewer] = await Promise.all([
-    Promise.resolve(getClaimTimeline(claim.id)),
-    Promise.resolve(claim.assignedTo ? getReviewerById(claim.assignedTo) : null),
+    getClaimTimeline(claim.id),
+    claim.assignedTo ? getReviewerById(claim.assignedTo) : Promise.resolve(null),
   ]);
 
   const ex: ExtractedData | null = claim.extractedData;

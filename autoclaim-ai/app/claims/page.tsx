@@ -8,8 +8,9 @@ initDb();
 interface SearchParams { status?: string; }
 
 export default async function ClaimsPage({ searchParams }: { searchParams: SearchParams }) {
+  await initDb();
   const status = searchParams.status as ClaimStatus | undefined;
-  const claims = getAllClaims(status ? { status } : undefined);
+  const claims = await getAllClaims(status ? { status } : undefined);
 
   return (
     <div className="min-h-screen">
