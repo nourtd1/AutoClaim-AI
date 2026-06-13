@@ -37,11 +37,6 @@ function fmtAmount(amount: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
-const SOURCE_COLORS: Record<string, string> = {
-  EMAIL: "border-blue-700  bg-blue-950  text-blue-300",
-  FORM:  "border-slate-700 bg-slate-900 text-slate-400",
-  PDF:   "border-red-800   bg-red-950   text-red-300",
-};
 
 // ── Sub-components (server-safe, no hooks) ────────────────────────────────────
 
