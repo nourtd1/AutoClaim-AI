@@ -14,7 +14,7 @@ export default async function ClaimsPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="min-h-screen">
-      <TopBar title="All Claims" subtitle="Search, filter and manage" />
+      <TopBar title="All Claims" subtitle="Search, filter and manage claims" />
 
       <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
         <div className="animate-fade-up-1">

@@ -67,15 +67,15 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
   };
 
   const selectClass = "rounded-lg text-xs px-2.5 py-1.5 focus:outline-none cursor-pointer transition-all duration-200";
-  const selectStyle = { background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "#E9D5FF" };
-  const inputClass  = "flex-1 min-w-[180px] rounded-lg text-xs px-3 py-1.5 placeholder:opacity-30 focus:outline-none transition-all duration-200";
+  const selectStyle = { background:"#FFFFFF", border:"1px solid #E2E8F0", color:"#1E293B" };
+  const inputClass  = "flex-1 min-w-[180px] rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-200";
 
   return (
     <div className="space-y-4">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[180px]">
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "rgba(168,85,247,0.45)" }}>
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
@@ -84,7 +84,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className={`${inputClass} pl-7`}
-            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "#E9D5FF" }}
+            style={{ background:"#FFFFFF", border:"1px solid #E2E8F0", color:"#1E293B" }}
           />
         </div>
 
@@ -107,7 +107,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
           onClick={refresh}
           disabled={isPending}
           className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-200 disabled:opacity-40"
-          style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", color: "rgba(196,132,252,0.7)" }}
+          style={{ background:"#FFFFFF", border:"1px solid #E2E8F0", color:"#64748B" }}
         >
           <svg className={`w-3 h-3 ${isPending ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
@@ -117,16 +117,16 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
       </div>
 
       {/* ── Count line ── */}
-      <p className="text-[11px]" style={{ color: "rgba(168,85,247,0.4)" }}>
-        <span className="font-semibold" style={{ color: "#C084FC" }}>{filtered.length}</span> claim{filtered.length !== 1 ? "s" : ""}
-        {search || statusFilter || priorityFilter || sourceFilter ? <span style={{ color: "rgba(168,85,247,0.3)" }}> · filtered</span> : ""}
+      <p className="text-[11px]" style={{ color:"#94A3B8" }}>
+        <span className="font-semibold" style={{ color:"#1E293B" }}>{filtered.length}</span> claim{filtered.length !== 1 ? "s" : ""}
+        {search || statusFilter || priorityFilter || sourceFilter ? <span style={{ color:"#94A3B8" }}> · filtered</span> : ""}
       </p>
 
       {/* ── Table (desktop) ── */}
-      <div className="hidden md:block rounded-xl2 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(124,58,237,0.04) 100%)", border: "1px solid rgba(168,85,247,0.18)", backdropFilter: "blur(24px)" }}>
+      <div className="hidden md:block rounded-xl2 overflow-hidden" style={{background:"#FFFFFF",border:"1px solid #E2E8F0",boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
         <table className="w-full text-xs">
           <thead>
-            <tr className="uppercase tracking-widest text-[10px]" style={{ borderBottom: "1px solid rgba(168,85,247,0.15)", color: "rgba(168,85,247,0.45)" }}>
+            <tr className="uppercase tracking-widest text-[10px]" style={{borderBottom:"1px solid #F1F5F9",background:"#F8FAFC",color:"#94A3B8"}}>
               <th className="px-4 py-3 text-left font-semibold">ID</th>
               <th className="px-4 py-3 text-left font-semibold">Claimant</th>
               <th className="px-4 py-3 text-left font-semibold">Type</th>
@@ -141,10 +141,8 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
             {pageClaims.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-12 text-center">
-                  <div className="flex flex-col items-center gap-2" style={{ color: "rgba(168,85,247,0.3)" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
+                  <div className="flex flex-col items-center gap-2" style={{color:"#94A3B8"}}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     No claims match your filters
                   </div>
                 </td>
@@ -154,38 +152,31 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
               <tr
                 key={c.id}
                 onClick={() => window.location.href = `/claims/${c.id}`}
-                className="cursor-pointer transition-all duration-150 group"
-                style={{ borderBottom: "1px solid rgba(168,85,247,0.08)" }}
-                onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "rgba(168,85,247,0.07)"}
+                className="cursor-pointer transition-all duration-150"
+                style={{borderBottom:"1px solid #F8FAFC"}}
+                onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = "#F8FAFC"}
                 onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = "transparent"}
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono-id tabular-nums" style={{ color: "rgba(168,85,247,0.5)" }}>{c.id.slice(0, 8)}…</span>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); copyId(c.id); }}
-                      title="Copy full ID"
-                      style={{ color: copied === c.id ? "#A855F7" : "rgba(168,85,247,0.25)" }}
-                      className="transition-colors hover:!text-purple-400"
-                    >
-                      {copied === c.id
+                    <span className="font-mono-id tabular-nums" style={{color:"#94A3B8"}}>{c.id.slice(0,8)}…</span>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); copyId(c.id); }} title="Copy full ID" style={{color:copied===c.id?"#4F46E5":"#CBD5E1"}} className="transition-colors">
+                      {copied===c.id
                         ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
-                        : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                      }
+                        : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
                     </button>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="font-semibold" style={{ color: "#E9D5FF" }}>{c.claimantName}</p>
-                  <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "rgba(168,85,247,0.35)" }}>{c.policyNumber}</p>
+                  <p className="font-semibold" style={{color:"#1E293B"}}>{c.claimantName}</p>
+                  <p className="font-mono-id text-[10px] mt-0.5" style={{color:"#94A3B8"}}>{c.policyNumber}</p>
                 </td>
-                <td className="px-4 py-3" style={{ color: "rgba(228,216,255,0.45)" }}>{c.claimType.replace(/_/g," ")}</td>
-                <td className="px-4 py-3 text-right font-mono-id font-bold tabular-nums" style={{ color: "#C084FC" }}>{fmtAmount(c.claimAmount, c.currency)}</td>
+                <td className="px-4 py-3" style={{color:"#64748B"}}>{c.claimType.replace(/_/g," ")}</td>
+                <td className="px-4 py-3 text-right font-mono-id font-bold tabular-nums" style={{color:"#4338CA"}}>{fmtAmount(c.claimAmount,c.currency)}</td>
                 <td className="px-4 py-3"><StatusBadge status={c.status} size="sm" /></td>
                 <td className="px-4 py-3"><PriorityBadge priority={c.priority} size="sm" /></td>
-                <td className="px-4 py-3" style={{ color: "rgba(168,85,247,0.4)" }}>{c.stage.replace(/_/g," ")}</td>
-                <td className="px-4 py-3 text-right font-mono-id tabular-nums" style={{ color: "rgba(168,85,247,0.35)" }}>{fmtDate(c.createdAt)}</td>
+                <td className="px-4 py-3" style={{color:"#64748B"}}>{c.stage.replace(/_/g," ")}</td>
+                <td className="px-4 py-3 text-right font-mono-id tabular-nums" style={{color:"#94A3B8"}}>{fmtDate(c.createdAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -195,12 +186,12 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
       {/* ── Cards (mobile) ── */}
       <div className="md:hidden space-y-2">
         {pageClaims.length === 0 && (
-          <p className="text-center text-xs text-slate-600 py-8">No claims match your filters</p>
+          <p className="text-center text-xs py-8" style={{color:"#94A3B8"}}>No claims match your filters</p>
         )}
         {pageClaims.map((c) => (
           <Link key={c.id} href={`/claims/${c.id}`}
             className="block rounded-xl p-3.5 space-y-2.5 transition-all duration-200"
-            style={{ background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.18)", backdropFilter: "blur(20px)" }}>
+            style={{background:"#FFFFFF",border:"1px solid #E2E8F0",boxShadow:"0 1px 2px rgba(0,0,0,0.04)"}}>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold" style={{ color: "#E9D5FF" }}>{c.claimantName}</p>
@@ -209,7 +200,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
               <StatusBadge status={c.status} size="sm" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono-id font-bold" style={{ color: "#C084FC" }}>{fmtAmount(c.claimAmount, c.currency)}</span>
+              <span className="font-mono-id font-bold" style={{ color:"#4338CA" }}>{fmtAmount(c.claimAmount, c.currency)}</span>
               <PriorityBadge priority={c.priority} size="sm" />
             </div>
           </Link>
@@ -222,18 +213,20 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 disabled:opacity-25 hover:border-white/[0.15] hover:text-slate-300 transition-all duration-200"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs disabled:opacity-30 transition-all duration-200"
+            style={{background:"#FFFFFF",border:"1px solid #E2E8F0",color:"#475569"}}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
             Prev
           </button>
-          <span className="text-xs text-slate-600 font-mono-id">
-            <span className="text-slate-400">{page}</span> / {totalPages}
+          <span className="text-xs font-mono-id" style={{color:"#64748B"}}>
+            <span style={{color:"#1E293B"}}>{page}</span> / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-500 disabled:opacity-25 hover:border-white/[0.15] hover:text-slate-300 transition-all duration-200"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs disabled:opacity-30 transition-all duration-200"
+            style={{background:"#FFFFFF",border:"1px solid #E2E8F0",color:"#475569"}}
           >
             Next
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
