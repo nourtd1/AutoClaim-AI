@@ -174,12 +174,6 @@ export default function DashboardPage() {
     { label: "Avg. Processing", value: stats.avgProcessingTime > 0 ? `${stats.avgProcessingTime}m` : "—", sub: "intake → resolution", icon: <IcoClock />, delay: "180ms", variant: "teal",   tooltip: "Average processing time today" },
   ];
 
-  const HEADER_STYLE = {
-    background: "rgba(8,5,15,0.92)",
-    backdropFilter: "blur(24px)",
-    borderBottom: "1px solid rgba(168,85,247,0.12)",
-  };
-
   const CARD_STYLE = {
     background: "linear-gradient(135deg, rgba(168,85,247,0.07) 0%, rgba(124,58,237,0.04) 100%)",
     border: "1px solid rgba(168,85,247,0.18)",
