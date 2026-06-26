@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
 
   try {
     if (source === "PDF") {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require("pdf-parse/lib/pdf-parse.js") as (buf: Buffer) => Promise<{ text: string }>;
+      // Dynamic import avoids pdf-parse running its test-file reads at module load time (breaks Vercel)
+      const { default: pdfParse } = await import("pdf-parse");
       const parsed = await pdfParse(buffer);
       rawText = parsed.text;
     } else {
