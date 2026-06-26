@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { initDb, createClaim, addDocument, addStageEvent, getDb } from "@/lib/db";
 
-// pdf-parse server-side only
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse") as (buf: Buffer) => Promise<{ text: string }>;
 
 const MAX_FILE_SIZE  = 10 * 1024 * 1024;
 const DESCRIPTION_MAX = 2000;
@@ -73,6 +70,8 @@ export async function POST(req: NextRequest) {
 
   try {
     if (source === "PDF") {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require("pdf-parse/lib/pdf-parse.js") as (buf: Buffer) => Promise<{ text: string }>;
       const parsed = await pdfParse(buffer);
       rawText = parsed.text;
     } else {
