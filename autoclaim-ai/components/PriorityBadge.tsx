@@ -1,13 +1,13 @@
 import type { ClaimPriority } from "@/lib/types";
 
 interface PriorityBadgeProps { priority: ClaimPriority; size?: "sm" | "md"; }
-type S = { bg:string; border:string; color:string; dot:string };
+type S = { bg: string; border: string; color: string; dot: string };
 
 const STYLES: Record<ClaimPriority, S> = {
-  LOW:      { bg:"#F8FAFC", border:"#CBD5E1", color:"#64748B", dot:"#94A3B8" },
-  MEDIUM:   { bg:"#FEFCE8", border:"#FEF08A", color:"#A16207", dot:"#EAB308" },
-  HIGH:     { bg:"#FFF7ED", border:"#FED7AA", color:"#C2410C", dot:"#F97316" },
-  CRITICAL: { bg:"#FEF2F2", border:"#FECACA", color:"#DC2626", dot:"#EF4444" },
+  LOW:      { bg: "rgba(74,85,104,0.12)",   border: "rgba(74,85,104,0.25)",  color: "#8B95B0", dot: "#4A5568" },
+  MEDIUM:   { bg: "rgba(234,179,8,0.1)",    border: "rgba(234,179,8,0.25)",  color: "#FCD34D", dot: "#EAB308" },
+  HIGH:     { bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.25)", color: "#FB923C", dot: "#F97316" },
+  CRITICAL: { bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.3)",   color: "#F87171", dot: "#EF4444" },
 };
 
 export default function PriorityBadge({ priority, size = "md" }: PriorityBadgeProps) {
@@ -16,8 +16,8 @@ export default function PriorityBadge({ priority, size = "md" }: PriorityBadgePr
   const isCritical = priority === "CRITICAL";
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border font-semibold ${px} ${isCritical ? "animate-critical" : ""}`}
-      style={{ background:s.bg, borderColor:s.border, color:s.color }}>
-      <span className="h-1 w-1 rounded-full shrink-0" style={{ background:s.dot }} />
+      style={{ background: s.bg, borderColor: s.border, color: s.color }}>
+      <span className="h-1 w-1 rounded-full shrink-0" style={{ background: s.dot }} />
       {priority}
     </span>
   );

@@ -54,10 +54,10 @@ export default function LiveCounter({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className={`font-mono-id font-bold tabular-nums ${numClass} ${color}`}>
+      <span className={`font-mono-id font-bold tabular-nums ${numClass}`} style={{ color }}>
         {displayed}
       </span>
-      <span className="text-[10px] uppercase tracking-widest text-slate-500 font-medium text-center">
+      <span className="text-[10px] uppercase tracking-widest font-medium text-center" style={{ color: "rgba(74,85,104,0.9)" }}>
         {label}
       </span>
     </div>

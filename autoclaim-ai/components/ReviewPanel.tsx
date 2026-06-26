@@ -52,16 +52,16 @@ function ResolutionCard({ claim }: { claim: Claim }) {
             Claim {ok ? "Approved" : "Rejected"}
           </p>
           {claim.resolvedAt && (
-            <p className="text-xs" style={{ color:"rgba(168,85,247,0.5)" }}>
-              {new Date(claim.resolvedAt).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
+            <p className="text-xs" style={{ color: "#4A5568" }}>
+              {new Date(claim.resolvedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
             </p>
           )}
         </div>
       </div>
       {claim.reviewNotes && (
         <div>
-          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color:"rgba(168,85,247,0.5)" }}>Reviewer notes</p>
-          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color:"rgba(228,216,255,0.65)" }}>{claim.reviewNotes}</p>
+          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#3A4155" }}>Reviewer notes</p>
+          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: "#8B95B0" }}>{claim.reviewNotes}</p>
         </div>
       )}
     </div>
@@ -100,8 +100,8 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
   };
 
   const CARD = {
-    background:"linear-gradient(135deg,rgba(168,85,247,0.07) 0%,rgba(124,58,237,0.04) 100%)",
-    border:"1px solid rgba(168,85,247,0.18)", backdropFilter:"blur(24px)",
+    background: "rgba(99,102,241,0.05)",
+    border: "1px solid rgba(99,102,241,0.15)",
   };
 
   const activeDecision = DECISIONS.find(d => d.key === decision);
@@ -110,20 +110,20 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
     <div className="rounded-xl p-5 space-y-5" style={CARD}>
       {/* Reviewer */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"rgba(168,85,247,0.5)" }}>Assigned Reviewer</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"#4A5568" }}>Assigned Reviewer</p>
         {reviewer ? (
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm"
-              style={{ background:"rgba(168,85,247,0.2)", border:"1px solid rgba(168,85,247,0.35)", color:"#C084FC" }}>
+              style={{ background:"rgba(99,102,241,0.15)", border:"1px solid rgba(99,102,241,0.3)", color:"#818CF8" }}>
               {reviewer.name.slice(0,1)}
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color:"#E9D5FF" }}>{reviewer.name}</p>
-              <p className="text-xs" style={{ color:"rgba(168,85,247,0.5)" }}>{reviewer.role}</p>
+              <p className="text-sm font-semibold" style={{ color:"#E8EBF4" }}>{reviewer.name}</p>
+              <p className="text-xs" style={{ color:"#4A5568" }}>{reviewer.role}</p>
             </div>
           </div>
         ) : (
-          <p className="text-xs italic" style={{ color:"rgba(168,85,247,0.35)" }}>Unassigned</p>
+          <p className="text-xs italic" style={{ color:"rgba(99,102,241,0.3)" }}>Unassigned</p>
         )}
       </div>
 
@@ -131,14 +131,14 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
       <div className="rounded-xl px-4 py-3 flex items-center justify-between"
         style={{ background:"rgba(168,85,247,0.06)", border:"1px solid rgba(168,85,247,0.14)" }}>
         <span className="text-xs" style={{ color:"rgba(168,85,247,0.55)" }}>Claimed amount</span>
-        <span className="font-mono-id text-sm font-bold" style={{ color:"#C084FC" }}>
+        <span className="font-mono-id text-sm font-bold" style={{ color:"#818CF8" }}>
           {fmtAmount(claim.claimAmount, claim.currency)}
         </span>
       </div>
 
       {/* Decision buttons */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"rgba(168,85,247,0.5)" }}>Decision</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color:"#4A5568" }}>Decision</p>
         <div className="grid grid-cols-2 gap-2">
           {DECISIONS.map(d => {
             const active = decision === d.key;
@@ -160,36 +160,34 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
 
       {/* Notes */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"rgba(168,85,247,0.5)" }}>
+        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"#4A5568" }}>
           Notes <span style={{ color:"#EC4899" }}>*</span>
         </label>
         <textarea ref={notesRef} value={notes} onChange={e => setNotes(e.target.value)}
           placeholder="Explain your decision (min. 10 characters)…" rows={3}
-          className="w-full rounded-xl text-sm px-3 py-2 focus:outline-none resize-none transition-all duration-200"
-          style={{ background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.2)", color:"#E9D5FF" }} />
+          className="input-dark w-full rounded-xl text-sm px-3 py-2 resize-none" />
         <p className="mt-1 text-[10px] text-right transition-colors"
-          style={{ color: notes.trim().length >= 10 ? "rgba(168,85,247,0.5)" : "rgba(236,72,153,0.5)" }}>
+          style={{ color: notes.trim().length >= 10 ? "#4A5568" : "rgba(239,68,68,0.5)" }}>
           {notes.trim().length}/10 min
         </p>
       </div>
 
       {/* Adjusted amount */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"rgba(168,85,247,0.5)" }}>
-          Adjusted Amount <span style={{ color:"rgba(168,85,247,0.35)" }}>(optional)</span>
+        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block" style={{ color:"#4A5568" }}>
+          Adjusted Amount <span style={{ color:"rgba(99,102,241,0.3)" }}>(optional)</span>
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color:"rgba(168,85,247,0.5)" }}>$</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color:"#4A5568" }}>$</span>
           <input type="text" value={adjustedAmount} onChange={e => setAdjustedAmount(e.target.value)}
             placeholder={String(claim.claimAmount)}
-            className="w-full rounded-xl text-sm pl-6 pr-3 py-2 focus:outline-none transition-all"
-            style={{ background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.2)", color:"#E9D5FF" }} />
+            className="input-dark w-full text-sm pl-6 pr-3 py-2" />
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl px-3 py-2.5 text-xs" style={{ background:"rgba(236,72,153,0.1)", border:"1px solid rgba(236,72,153,0.3)", color:"#F9A8D4" }}>
+        <div className="rounded-xl px-3 py-2.5 text-xs" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#F87171" }}>
           {error}
         </div>
       )}
@@ -203,7 +201,7 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
           color: activeDecision.style.activeColor,
           boxShadow:`0 0 16px ${activeDecision.style.activeBg}`,
         } : {
-          background:"rgba(168,85,247,0.07)", border:"1px solid rgba(168,85,247,0.18)", color:"rgba(196,132,252,0.5)",
+          background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.14)", color: "rgba(129,140,248,0.4)",
         }}>
         {submitting ? "Submitting…" : decision ? `Submit — ${DECISIONS.find(d=>d.key===decision)?.label}` : "Select a decision"}
       </button>

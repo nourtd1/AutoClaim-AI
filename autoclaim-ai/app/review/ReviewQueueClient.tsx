@@ -9,20 +9,8 @@ import LiveCounter from "@/components/ui/LiveCounter";
 import ToastContainer, { ToastStyles } from "@/components/ui/Toast";
 import type { ToastMessage } from "@/components/ui/Toast";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface QueueItem extends Claim {
-  assignedReviewer: Reviewer | null;
-}
-
-interface QueueStats {
-  total: number;
-  escalated: number;
-  pending: number;
-  avgWaitMinutes: number;
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+interface QueueItem extends Claim { assignedReviewer: Reviewer | null; }
+interface QueueStats { total: number; escalated: number; pending: number; avgWaitMinutes: number; }
 
 function waitTime(createdAt: string): string {
   const diff = Date.now() - new Date(createdAt).getTime();
@@ -59,8 +47,7 @@ function ReassignModal({ claimId, reviewers, onClose, onDone }: ReassignModalPro
 
   const submit = async () => {
     if (!selected) return;
-    setLoading(true);
-    setErr(null);
+    setLoading(true); setErr(null);
     try {
       const res = await fetch(`/api/review/${claimId}/reassign`, {
         method: "POST",
@@ -77,40 +64,44 @@ function ReassignModal({ claimId, reviewers, onClose, onDone }: ReassignModalPro
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div className="glass rounded-xl2 border border-white/10 p-6 w-full max-w-sm space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-sm font-semibold text-slate-100">Reassign Claim</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center animate-backdrop-in"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+      onClick={onClose}>
+      <div className="rounded-xl2 p-6 w-full max-w-sm space-y-4 animate-modal-in" onClick={(e) => e.stopPropagation()}
+        style={{ background: "#0D1124", border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.06) inset" }}>
+        <h3 className="text-sm font-semibold" style={{ color: "#E8EBF4" }}>Reassign Claim</h3>
         <div className="space-y-2">
-          {reviewers.length === 0 && <p className="text-xs text-slate-500">No reviewers available</p>}
+          {reviewers.length === 0 && <p className="text-xs" style={{ color: "#4A5568" }}>No reviewers available</p>}
           {reviewers.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setSelected(r.id)}
-              className={`w-full flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                selected === r.id
-                  ? "border-violet-600 bg-violet-950"
-                  : "border-white/10 bg-slate-900 hover:border-white/20"
-              }`}
-            >
-              <div className="h-8 w-8 rounded-full border border-violet-700 bg-violet-900 flex items-center justify-center text-sm font-bold text-violet-300 shrink-0">
+            <button key={r.id} onClick={() => setSelected(r.id)}
+              className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-150"
+              style={selected === r.id
+                ? { background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.35)" }
+                : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818CF8" }}>
                 {r.name.slice(0, 1)}
               </div>
               <div>
-                <p className="text-sm text-slate-200 font-medium">{r.name}</p>
-                <p className="text-xs text-slate-500">{r.role}</p>
+                <p className="text-sm font-medium" style={{ color: "#E8EBF4" }}>{r.name}</p>
+                <p className="text-xs" style={{ color: "#4A5568" }}>{r.role}</p>
               </div>
-              {!r.isAvailable && <span className="ml-auto text-[10px] text-red-400 border border-red-800 rounded-full px-1.5 py-px">Unavailable</span>}
+              {!r.isAvailable && (
+                <span className="ml-auto text-[10px] rounded-full px-1.5 py-px" style={{ color: "#F87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+                  Unavailable
+                </span>
+              )}
             </button>
           ))}
         </div>
-        {err && <p className="text-xs text-red-400">{err}</p>}
+        {err && <p className="text-xs" style={{ color: "#F87171" }}>{err}</p>}
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-400 hover:border-white/20 transition-colors">Cancel</button>
-          <button
-            onClick={submit}
-            disabled={!selected || loading}
-            className="flex-1 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-40 px-3 py-2 text-xs font-semibold text-white transition-colors"
-          >
+          <button onClick={onClose}
+            className="flex-1 rounded-lg px-3 py-2 text-xs transition-colors btn-ghost">
+            Cancel
+          </button>
+          <button onClick={submit} disabled={!selected || loading}
+            className="flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-white disabled:opacity-40 transition-all duration-200 btn-primary">
             {loading ? "Reassigning…" : "Confirm"}
           </button>
         </div>
@@ -121,28 +112,21 @@ function ReassignModal({ claimId, reviewers, onClose, onDone }: ReassignModalPro
 
 // ── Queue item card ───────────────────────────────────────────────────────────
 
-function QueueCard({
-  item,
-  onReassign,
-}: {
-  item: QueueItem;
-  onReassign: (id: string) => void;
-}) {
+function QueueCard({ item, onReassign }: { item: QueueItem; onReassign: (id: string) => void }) {
   const vr = item.validationResult as ValidationResult | null;
   const riskScore = vr?.riskScore ?? null;
-  const riskColor =
-    riskScore === null ? "text-slate-500"
-    : riskScore >= 70 ? "text-red-400"
-    : riskScore >= 40 ? "text-orange-400"
-    : "text-emerald-400";
+  const riskColor = riskScore === null ? "#4A5568"
+    : riskScore >= 70 ? "#F87171"
+    : riskScore >= 40 ? "#FB923C"
+    : "#34D399";
 
   return (
-    <div className="glass glass-hover rounded-xl p-4 space-y-3">
+    <div className="card-glow rounded-xl p-4 space-y-3">
       {/* Top row */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-semibold text-slate-100 text-sm truncate">{item.claimantName}</p>
-          <p className="font-mono-id text-[11px] text-slate-500">{item.policyNumber}</p>
+          <p className="font-semibold text-sm truncate" style={{ color: "#E8EBF4" }}>{item.claimantName}</p>
+          <p className="font-mono-id text-[11px]" style={{ color: "#4A5568" }}>{item.policyNumber}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <StatusBadge status={item.status} size="sm" />
@@ -150,51 +134,44 @@ function QueueCard({
         </div>
       </div>
 
-      {/* Metrics row */}
+      {/* Metrics */}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-lg bg-slate-900 border border-white/[0.06] p-2">
-          <p className="font-mono-id font-bold text-emerald-400 text-sm">{fmtAmount(item.claimAmount, item.currency)}</p>
-          <p className="text-[10px] text-slate-600 uppercase tracking-wide mt-0.5">amount</p>
-        </div>
-        <div className="rounded-lg bg-slate-900 border border-white/[0.06] p-2">
-          <p className={`font-mono-id font-bold text-sm ${riskColor}`}>
-            {riskScore !== null ? riskScore : "—"}
-          </p>
-          <p className="text-[10px] text-slate-600 uppercase tracking-wide mt-0.5">risk</p>
-        </div>
-        <div className="rounded-lg bg-slate-900 border border-white/[0.06] p-2">
-          <p className="font-mono-id font-bold text-slate-300 text-sm">{waitTime(item.createdAt)}</p>
-          <p className="text-[10px] text-slate-600 uppercase tracking-wide mt-0.5">waiting</p>
-        </div>
+        {[
+          { label: "amount",  value: fmtAmount(item.claimAmount, item.currency), color: "#34D399" },
+          { label: "risk",    value: riskScore !== null ? String(riskScore) : "—",  color: riskColor },
+          { label: "waiting", value: waitTime(item.createdAt), color: "#8B95B0" },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p className="font-mono-id font-bold text-sm tabular-nums" style={{ color }}>{value}</p>
+            <p className="text-[10px] uppercase tracking-wide mt-0.5" style={{ color: "#3A4155" }}>{label}</p>
+          </div>
+        ))}
       </div>
 
       {/* Type + reviewer */}
       <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-500">{item.claimType.replace(/_/g, " ")}</span>
+        <span style={{ color: "#8B95B0" }}>{item.claimType.replace(/_/g, " ")}</span>
         {item.assignedReviewer ? (
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="h-5 w-5 rounded-full bg-violet-900 border border-violet-700 flex items-center justify-center text-[10px] font-bold text-violet-300">
+          <span className="flex items-center gap-1.5" style={{ color: "#8B95B0" }}>
+            <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+              style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818CF8" }}>
               {item.assignedReviewer.name.slice(0, 1)}
             </span>
             {item.assignedReviewer.name.split(" ")[0]}
           </span>
         ) : (
-          <span className="text-slate-600 italic text-[11px]">Unassigned</span>
+          <span className="italic text-[11px]" style={{ color: "#3A4155" }}>Unassigned</span>
         )}
       </div>
 
-      {/* Action buttons */}
+      {/* Actions */}
       <div className="flex gap-2 pt-1">
-        <Link
-          href={`/claims/${item.id}#review`}
-          className="flex-1 rounded-lg bg-violet-600 hover:bg-violet-500 transition-colors px-3 py-2 text-center text-xs font-semibold text-white"
-        >
+        <Link href={`/claims/${item.id}#review`}
+          className="flex-1 rounded-lg px-3 py-2 text-center text-xs font-semibold text-white transition-all duration-200 btn-primary">
           Review →
         </Link>
-        <button
-          onClick={() => onReassign(item.id)}
-          className="rounded-lg border border-white/10 hover:border-white/20 transition-colors px-3 py-2 text-xs text-slate-400"
-        >
+        <button onClick={() => onReassign(item.id)}
+          className="rounded-lg px-3 py-2 text-xs transition-all duration-200 btn-ghost">
           Reassign
         </button>
       </div>
@@ -230,7 +207,6 @@ export default function ReviewQueueClient({ initialItems, availableReviewers }: 
       const json = await res.json();
       if (!json.data) return;
       const next = json.data as QueueItem[];
-      // Detect new arrivals
       for (const item of next) {
         if (!prevIds.current.has(item.id)) {
           addToast(`New claim requires review — ${item.claimantName}`, "warning");
@@ -238,15 +214,11 @@ export default function ReviewQueueClient({ initialItems, availableReviewers }: 
       }
       prevIds.current = new Set(next.map((i) => i.id));
       setItems(next);
-      // Update document title
       const pendingCount = next.length;
       document.title = pendingCount > 0 ? `(${pendingCount}) Review Queue — AutoClaim AI` : "Review Queue — AutoClaim AI";
-    } catch {
-      // silent — don't spam toasts on network hiccup
-    }
+    } catch { /**/ }
   }, [addToast]);
 
-  // Poll every 30 seconds
   useEffect(() => {
     const id = setInterval(fetchQueue, 30_000);
     return () => clearInterval(id);
@@ -270,60 +242,60 @@ export default function ReviewQueueClient({ initialItems, availableReviewers }: 
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {[
-          { label: "Total Pending",  value: stats.total,            color: "text-slate-200" },
-          { label: "Escalated",      value: stats.escalated,        color: "text-rose-400" },
-          { label: "Pending Review", value: stats.pending,          color: "text-orange-400" },
-          { label: "Avg Wait (min)", value: stats.avgWaitMinutes,   color: "text-violet-400" },
+          { label: "Total Pending",  value: stats.total,          color: "#E8EBF4" },
+          { label: "Escalated",      value: stats.escalated,      color: "#FB7185" },
+          { label: "Pending Review", value: stats.pending,        color: "#FB923C" },
+          { label: "Avg Wait (min)", value: stats.avgWaitMinutes, color: "#818CF8" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="glass rounded-xl p-4 flex flex-col items-center gap-1">
+          <div key={label} className="card-glow rounded-xl p-4 flex flex-col items-center gap-1">
             <LiveCounter value={value} label={label} color={color} />
           </div>
         ))}
       </div>
 
-      {/* ESCALATED section */}
+      {/* ESCALATED */}
       {escalated.length > 0 && (
         <section className="mb-8 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-rose-500 animate-status-pulse" />
-            <h2 className="text-sm font-semibold text-rose-300 uppercase tracking-wide">
+            <span className="h-2 w-2 rounded-full animate-status-pulse" style={{ background: "#F43F5E" }} />
+            <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: "#FB7185" }}>
               Escalated — {escalated.length}
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {escalated.map((item) => (
-              <QueueCard key={item.id} item={item} onReassign={setReassignTarget} />
-            ))}
+            {escalated.map((item) => <QueueCard key={item.id} item={item} onReassign={setReassignTarget} />)}
           </div>
         </section>
       )}
 
-      {/* PENDING REVIEW section */}
+      {/* PENDING REVIEW */}
       {pending.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-orange-500" />
-            <h2 className="text-sm font-semibold text-orange-300 uppercase tracking-wide">
+            <span className="h-2 w-2 rounded-full" style={{ background: "#F97316" }} />
+            <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: "#FB923C" }}>
               Pending Review — {pending.length}
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {pending.map((item) => (
-              <QueueCard key={item.id} item={item} onReassign={setReassignTarget} />
-            ))}
+            {pending.map((item) => <QueueCard key={item.id} item={item} onReassign={setReassignTarget} />)}
           </div>
         </section>
       )}
 
       {items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 space-y-3 text-center">
-          <span className="text-5xl">✅</span>
-          <p className="text-slate-300 font-semibold">Queue is clear</p>
-          <p className="text-xs text-slate-600">No claims require human review right now.</p>
+        <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
+          <div className="h-14 w-14 rounded-2xl flex items-center justify-center"
+            style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p className="font-semibold" style={{ color: "#E8EBF4" }}>Queue is clear</p>
+          <p className="text-xs" style={{ color: "#4A5568" }}>No claims require human review right now.</p>
         </div>
       )}
 
-      {/* Reassign modal */}
       {reassignTarget && (
         <ReassignModal
           claimId={reassignTarget}

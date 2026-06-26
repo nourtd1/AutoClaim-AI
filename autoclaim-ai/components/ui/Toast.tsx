@@ -13,11 +13,11 @@ interface ToastProps {
   onDismiss: (id: string) => void;
 }
 
-const TYPE_STYLE: Record<string, string> = {
-  info:    "border-blue-700   bg-blue-950   text-blue-200",
-  success: "border-emerald-700 bg-emerald-950 text-emerald-200",
-  warning: "border-orange-700  bg-orange-950  text-orange-200",
-  error:   "border-red-700    bg-red-950    text-red-200",
+const TYPE_STYLE: Record<string, { bg: string; border: string; color: string }> = {
+  info:    { bg: "rgba(59,130,246,0.1)",  border: "rgba(59,130,246,0.25)",  color: "#60A5FA" },
+  success: { bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)",  color: "#34D399" },
+  warning: { bg: "rgba(249,115,22,0.1)",  border: "rgba(249,115,22,0.25)",  color: "#FB923C" },
+  error:   { bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.25)",   color: "#F87171" },
 };
 
 function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => void }) {
@@ -26,15 +26,14 @@ function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => voi
     return () => clearTimeout(t);
   }, [onDismiss]);
 
-  const style = TYPE_STYLE[msg.type ?? "info"] ?? TYPE_STYLE["info"];
+  const s = TYPE_STYLE[msg.type ?? "info"] ?? { bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.25)", color: "#60A5FA" };
 
   return (
-    <div
-      className={`flex items-center gap-3 rounded-xl border px-4 py-3 shadow-xl text-sm max-w-sm ${style}`}
-      style={{ animation: "toast-in 0.25s ease forwards" }}
-    >
-      <p className="flex-1">{msg.message}</p>
-      <button onClick={onDismiss} className="text-current opacity-60 hover:opacity-100 transition-opacity text-lg leading-none">×</button>
+    <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm max-w-sm"
+      style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color, animation: "toast-in 0.25s ease forwards", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+      <p className="flex-1" style={{ color: "#E8EBF4" }}>{msg.message}</p>
+      <button onClick={onDismiss} className="transition-opacity hover:opacity-100 opacity-50 text-lg leading-none"
+        style={{ color: s.color }}>×</button>
     </div>
   );
 }
@@ -48,8 +47,6 @@ export default function ToastContainer({ messages, onDismiss }: ToastProps) {
     </div>
   );
 }
-
-// ── Global toast keyframe (injected once) ─────────────────────────────────────
 
 export function ToastStyles() {
   return (
