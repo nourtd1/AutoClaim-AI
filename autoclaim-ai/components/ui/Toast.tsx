@@ -26,7 +26,7 @@ function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => voi
     return () => clearTimeout(t);
   }, [onDismiss]);
 
-  const s = TYPE_STYLE[msg.type ?? "info"] ?? TYPE_STYLE.info;
+  const s = TYPE_STYLE[msg.type ?? "info"] ?? TYPE_STYLE.info!;
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm max-w-sm"
