@@ -71,8 +71,8 @@ export async function POST(req: NextRequest) {
   try {
     if (source === "PDF") {
       // Dynamic import avoids pdf-parse running its test-file reads at module load time (breaks Vercel)
-      const pdfMod = await import("pdf-parse");
-      const pdfParse = (pdfMod.default ?? pdfMod) as unknown as (buf: Buffer) => Promise<{ text: string }>;
+      const pdfMod = await import("pdf-parse") as unknown as { default?: (buf: Buffer) => Promise<{ text: string }> } & ((buf: Buffer) => Promise<{ text: string }>);
+      const pdfParse: (buf: Buffer) => Promise<{ text: string }> = pdfMod.default ?? pdfMod;
       const parsed = await pdfParse(buffer);
       rawText = parsed.text;
     } else {
