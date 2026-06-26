@@ -47,39 +47,39 @@ async function fetchStats(): Promise<DashboardStats> {
   return { total, approved, rejected, escalated, pending, avgProcessingTime, autoApprovalRate };
 }
 
-// ── KPI Card ─────────────────────────────────────────────────────────────────
+// ── KPI card ──────────────────────────────────────────────────────────────────
 
-interface KpiConfig { label: string; value: string | number; sub?: string; tooltip: string; icon: React.ReactNode; delay: string; variant: "indigo" | "emerald" | "orange" | "rose"; }
+interface KpiConfig {
+  label: string; value: string | number; sub?: string; tooltip: string;
+  icon: React.ReactNode; delay: string;
+  accent: string; accentDim: string; accentBorder: string;
+}
 
-const KPI_STYLES = {
-  indigo:  { accent: "#6366F1", accentDim: "rgba(99,102,241,0.12)",  accentBorder: "rgba(99,102,241,0.25)",  iconBg: "rgba(99,102,241,0.2)",  iconColor: "#818CF8", valueColor: "#818CF8" },
-  emerald: { accent: "#10B981", accentDim: "rgba(16,185,129,0.1)",   accentBorder: "rgba(16,185,129,0.2)",   iconBg: "rgba(16,185,129,0.15)", iconColor: "#34D399", valueColor: "#34D399" },
-  orange:  { accent: "#F97316", accentDim: "rgba(249,115,22,0.1)",   accentBorder: "rgba(249,115,22,0.2)",   iconBg: "rgba(249,115,22,0.15)", iconColor: "#FB923C", valueColor: "#FB923C" },
-  rose:    { accent: "#F43F5E", accentDim: "rgba(244,63,94,0.1)",    accentBorder: "rgba(244,63,94,0.2)",    iconBg: "rgba(244,63,94,0.15)",  iconColor: "#FB7185", valueColor: "#FB7185" },
-} as const;
-
-function KpiCard({ label, value, sub, tooltip, icon, delay, variant }: KpiConfig) {
-  const s = KPI_STYLES[variant];
+function KpiCard({ label, value, sub, tooltip, icon, delay, accent, accentDim, accentBorder }: KpiConfig) {
   return (
     <div
-      className={`kpi-card kpi-card-${variant} rounded-xl2 p-5 space-y-3.5 relative overflow-hidden animate-fade-up`}
+      className="kpi-card rounded-xl p-5 space-y-3 relative overflow-hidden animate-fade-up"
       style={{ animationDelay: delay }}
       title={tooltip}>
-      {/* Top accent line */}
-      <div className="absolute top-0 left-8 right-8 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, ${s.accent}, transparent)`, opacity: 0.5 }} />
 
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold tracking-wide" style={{ color: "rgba(139,149,176,0.7)" }}>{label}</p>
+      {/* Subtle top signal line */}
+      <div className="absolute top-0 left-6 right-6 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, opacity: 0.45 }} />
+
+      {/* Icon + label row */}
+      <div className="flex items-center justify-between gap-2">
         <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: s.iconBg, border: `1px solid ${s.accentBorder}` }}>
-          <span style={{ color: s.iconColor }}>{icon}</span>
+          style={{ background: accentDim, border: `1px solid ${accentBorder}` }}>
+          <span style={{ color: accent }}>{icon}</span>
         </div>
+        <p className="text-[11px] font-medium text-right leading-snug"
+          style={{ color: "oklch(0.42 0.007 140)" }}>{label}</p>
       </div>
 
+      {/* Value */}
       <div>
-        <KpiNumber value={value} color={s.valueColor} />
-        {sub && <p className="text-[11px] mt-1.5" style={{ color: "rgba(74,85,104,0.9)" }}>{sub}</p>}
+        <KpiNumber value={value} color={accent} />
+        {sub && <p className="text-[11px] mt-1.5 truncate" style={{ color: "oklch(0.35 0.005 140)" }}>{sub}</p>}
       </div>
     </div>
   );
@@ -88,14 +88,19 @@ function KpiCard({ label, value, sub, tooltip, icon, delay, variant }: KpiConfig
 // ── Status config ─────────────────────────────────────────────────────────────
 
 const STATUS_BAR: Record<string, string> = {
-  SUBMITTED: "#4A5568", EXTRACTING: "#3B82F6", VALIDATING: "#6366F1",
-  PENDING_REVIEW: "#F97316", APPROVED: "#10B981", REJECTED: "#EF4444", ESCALATED: "#F43F5E",
+  SUBMITTED:      "oklch(0.38 0.005 140)",
+  EXTRACTING:     "oklch(0.70 0.17 230)",
+  VALIDATING:     "oklch(0.72 0.18 142)",
+  PENDING_REVIEW: "oklch(0.80 0.13 78)",
+  APPROVED:       "oklch(0.72 0.18 142)",
+  REJECTED:       "oklch(0.68 0.22 22)",
+  ESCALATED:      "oklch(0.70 0.19 12)",
 };
 
 const ACTOR_META: Record<string, { symbol: string; bg: string; border: string; color: string }> = {
-  AGENT: { symbol: "✦", bg: "rgba(99,102,241,0.12)",  border: "rgba(99,102,241,0.25)",  color: "#818CF8" },
-  ROBOT: { symbol: "◆", bg: "rgba(13,148,136,0.12)",  border: "rgba(13,148,136,0.25)",  color: "#2DD4BF" },
-  HUMAN: { symbol: "●", bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.25)",  color: "#FB923C" },
+  AGENT: { symbol: "✦", bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.25)", color: "oklch(0.82 0.16 142)" },
+  ROBOT: { symbol: "◆", bg: "oklch(0.65 0.15 195 / 0.11)", border: "oklch(0.65 0.15 195 / 0.25)", color: "oklch(0.75 0.12 195)" },
+  HUMAN: { symbol: "●", bg: "oklch(0.80 0.13 78 / 0.11)",  border: "oklch(0.80 0.13 78 / 0.25)",  color: "oklch(0.88 0.11 78)" },
 };
 
 function relativeTime(iso: string) {
@@ -106,10 +111,10 @@ function relativeTime(iso: string) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-const IcoDoc   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>;
-const IcoBot   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M12 2v4"/><circle cx="12" cy="6" r="2"/></svg>;
-const IcoEye   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
-const IcoClock = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>;
+const IcoDoc   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>;
+const IcoBot   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M12 2v4"/><circle cx="12" cy="6" r="2"/></svg>;
+const IcoEye   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+const IcoClock = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>;
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
@@ -124,58 +129,89 @@ export default async function DashboardPage() {
   const autoResolvedAll = allClaims.filter(c => c.status === "APPROVED").length;
 
   const kpis: KpiConfig[] = [
-    { label: "Claims Today",     value: stats.total,                 sub: "submitted since midnight",                 icon: <IcoDoc />,   delay: "0ms",   variant: "indigo",  tooltip: "Claims today" },
-    { label: "AI Resolved",      value: `${stats.autoApprovalRate}%`,sub: `${stats.approved} approved · ${stats.rejected} rejected`, icon: <IcoBot />, delay: "60ms",  variant: "emerald", tooltip: "Auto-resolved by AI" },
-    { label: "Pending Review",   value: stats.pending,               sub: "awaiting human decision",                  icon: <IcoEye />,   delay: "120ms", variant: "orange",  tooltip: "Claims needing review" },
-    { label: "Avg. Processing",  value: stats.avgProcessingTime > 0 ? `${stats.avgProcessingTime}m` : "—", sub: "intake → resolution", icon: <IcoClock />, delay: "180ms", variant: "rose", tooltip: "Average processing time" },
+    {
+      label: "Claims Today", value: stats.total, sub: "submitted since midnight",
+      icon: <IcoDoc />, delay: "0ms", tooltip: "Claims today",
+      accent: "oklch(0.72 0.18 142)", accentDim: "oklch(0.72 0.18 142 / 0.12)", accentBorder: "oklch(0.72 0.18 142 / 0.25)",
+    },
+    {
+      label: "AI Resolved", value: `${stats.autoApprovalRate}%`, sub: `${stats.approved} approved · ${stats.rejected} rejected`,
+      icon: <IcoBot />, delay: "55ms", tooltip: "Auto-resolved by AI",
+      accent: "oklch(0.72 0.18 142)", accentDim: "oklch(0.72 0.18 142 / 0.12)", accentBorder: "oklch(0.72 0.18 142 / 0.25)",
+    },
+    {
+      label: "Pending Review", value: stats.pending, sub: "awaiting human decision",
+      icon: <IcoEye />, delay: "110ms", tooltip: "Claims needing review",
+      accent: "oklch(0.80 0.13 78)", accentDim: "oklch(0.80 0.13 78 / 0.11)", accentBorder: "oklch(0.80 0.13 78 / 0.25)",
+    },
+    {
+      label: "Avg. Processing", value: stats.avgProcessingTime > 0 ? `${stats.avgProcessingTime}m` : "—", sub: "intake → resolution",
+      icon: <IcoClock />, delay: "165ms", tooltip: "Average processing time",
+      accent: "oklch(0.68 0.22 22)", accentDim: "oklch(0.68 0.22 22 / 0.10)", accentBorder: "oklch(0.68 0.22 22 / 0.25)",
+    },
   ];
 
   return (
     <div className="min-h-screen">
       <TopBar title="Dashboard" subtitle="Powered by Claude AI & UiPath Maestro" pending={stats.pending} />
 
-      <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
+      <main className="mx-auto max-w-7xl px-6 py-7 space-y-5">
 
         {/* KPIs */}
         <section>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {kpis.map(kpi => <KpiCard key={kpi.label} {...kpi} />)}
           </div>
         </section>
 
-        {/* Activity + Feed */}
-        <div className="grid lg:grid-cols-5 gap-5 animate-fade-up-2">
+        {/* Activity feed + live events */}
+        <div className="grid lg:grid-cols-5 gap-4 animate-fade-up-2">
 
           {/* Recent Activity */}
-          <section className="lg:col-span-2 card-glow rounded-xl2 p-5">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-sm font-semibold" style={{ color: "#E8EBF4" }}>Recent Activity</h2>
-                <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "#6366F1" }} />
+          <section className="lg:col-span-2 card-glow rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[13px] font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>Recent Activity</h2>
+                <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "oklch(0.72 0.18 142)" }} />
               </div>
-              <Link href="/claims" className="text-[11px] font-medium transition-colors hover:opacity-80" style={{ color: "#6366F1" }}>View all →</Link>
+              <Link href="/claims"
+                className="text-[11px] font-medium transition-opacity hover:opacity-70"
+                style={{ color: "oklch(0.72 0.18 142)" }}>
+                View all →
+              </Link>
             </div>
             <ol className="space-y-4">
               {recentEvents.length === 0 && (
-                <li className="text-xs py-6 text-center" style={{ color: "#3A4155" }}>No activity yet</li>
+                <li className="text-xs py-6 text-center" style={{ color: "oklch(0.28 0.004 140)" }}>No activity yet</li>
               )}
               {recentEvents.map((ev, i) => {
-                const actor = ACTOR_META[ev.actor] ?? { symbol: "·", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.08)", color: "#4A5568" };
+                const actor = ACTOR_META[ev.actor] ?? {
+                  symbol: "·",
+                  bg: "oklch(1.00 0.000 0 / 0.04)",
+                  border: "oklch(1.00 0.000 0 / 0.08)",
+                  color: "oklch(0.38 0.005 140)",
+                };
                 return (
-                  <li key={ev.id} className="flex items-start gap-3 text-xs animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+                  <li key={ev.id} className="flex items-start gap-3 text-xs animate-fade-up" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="mt-0.5 h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
                       style={{ background: actor.bg, border: `1px solid ${actor.border}`, color: actor.color }}>
                       {actor.symbol}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate leading-snug" style={{ color: "#E8EBF4" }}>
+                      <p className="truncate leading-snug" style={{ color: "oklch(0.93 0.005 140)" }}>
                         <span className="font-semibold">{ev.claimantName}</span>
-                        <span className="mx-1" style={{ color: "#3A4155" }}>·</span>
-                        <span style={{ color: "#8B95B0" }}>{ev.stage.replace(/_/g, " ")}</span>
+                        <span className="mx-1" style={{ color: "oklch(0.28 0.004 140)" }}>·</span>
+                        <span style={{ color: "oklch(0.55 0.008 140)" }}>{ev.stage.replace(/_/g, " ")}</span>
                       </p>
-                      {ev.notes && <p className="truncate mt-0.5 text-[11px]" style={{ color: "#4A5568" }}>{ev.notes}</p>}
+                      {ev.notes && (
+                        <p className="truncate mt-0.5 text-[11px]" style={{ color: "oklch(0.38 0.005 140)" }}>
+                          {ev.notes}
+                        </p>
+                      )}
                     </div>
-                    <time className="shrink-0 font-mono-id tabular-nums text-[10px] pt-0.5" style={{ color: "#3A4155" }} suppressHydrationWarning>
+                    <time className="shrink-0 font-mono-id tabular-nums text-[10px] pt-0.5"
+                      style={{ color: "oklch(0.30 0.004 140)" }}
+                      suppressHydrationWarning>
                       {relativeTime(ev.timestamp)}
                     </time>
                   </li>
@@ -185,34 +221,49 @@ export default async function DashboardPage() {
           </section>
 
           {/* Live Feed */}
-          <div className="lg:col-span-3"><LiveFeed /></div>
+          <div className="lg:col-span-3">
+            <LiveFeed />
+          </div>
         </div>
 
-        {/* Status + All-time */}
-        <div className="grid lg:grid-cols-3 gap-5 animate-fade-up-3">
-          <section className="lg:col-span-2 card-glow rounded-xl2 p-5">
+        {/* Status breakdown + all-time */}
+        <div className="grid lg:grid-cols-3 gap-4 animate-fade-up-3">
+
+          {/* Claims by Status */}
+          <section className="lg:col-span-2 card-glow rounded-xl p-5">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-semibold" style={{ color: "#E8EBF4" }}>Claims by Status</h2>
-              <span className="text-[11px] font-mono-id" style={{ color: "#3A4155" }}>{totalClaims} total</span>
+              <h2 className="text-[13px] font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>Claims by Status</h2>
+              <span className="text-[11px] font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>
+                {totalClaims} total
+              </span>
             </div>
             <ul className="space-y-3.5">
               {(["APPROVED", "PENDING_REVIEW", "ESCALATED", "VALIDATING", "EXTRACTING", "SUBMITTED", "REJECTED"] as ClaimStatus[]).map((st, idx) => {
                 const count  = statusCounts[st] ?? 0;
                 const pct    = Math.round((count / Math.max(1, totalClaims)) * 100);
                 const barPct = Math.round((count / maxCount) * 100);
-                const color  = STATUS_BAR[st] ?? "#4A5568";
+                const color  = STATUS_BAR[st] ?? "oklch(0.38 0.005 140)";
                 return (
                   <li key={st} className="animate-stagger" style={{ "--i": idx } as React.CSSProperties}>
-                    <div className="flex items-center justify-between text-[11px] mb-2">
-                      <span className="font-medium" style={{ color: "#8B95B0" }}>{st.replace(/_/g, " ")}</span>
+                    <div className="flex items-center justify-between text-[11px] mb-1.5">
+                      <span className="font-medium" style={{ color: "oklch(0.55 0.008 140)" }}>
+                        {st.replace(/_/g, " ")}
+                      </span>
                       <div className="flex items-center gap-2.5">
-                        <span className="font-mono-id" style={{ color: "#3A4155" }}>{pct}%</span>
-                        <span className="font-mono-id font-bold tabular-nums w-6 text-right" style={{ color: count > 0 ? color : "#3A4155" }}>{count}</span>
+                        <span className="font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>{pct}%</span>
+                        <span className="font-mono-id font-bold tabular-nums w-6 text-right"
+                          style={{ color: count > 0 ? color : "oklch(0.30 0.004 140)" }}>
+                          {count}
+                        </span>
                       </div>
                     </div>
-                    <div className="h-1 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                    <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "oklch(1.00 0.000 0 / 0.09)" }}>
                       <div className="h-full rounded-full animate-bar"
-                        style={{ width: `${barPct}%`, background: color, boxShadow: count > 0 ? `0 0 8px ${color}40` : "none" }} />
+                        style={{
+                          width: `${barPct}%`,
+                          background: color,
+                          boxShadow: count > 0 ? `0 0 6px ${color}` : "none",
+                        }} />
                     </div>
                   </li>
                 );
@@ -220,48 +271,99 @@ export default async function DashboardPage() {
             </ul>
           </section>
 
-          <section className="card-glow rounded-xl2 p-5 flex flex-col">
-            <h2 className="text-sm font-semibold mb-5" style={{ color: "#E8EBF4" }}>All-Time</h2>
+          {/* All-time stats */}
+          <section className="card-glow rounded-xl p-5 flex flex-col">
+            <h2 className="text-[13px] font-semibold mb-4" style={{ color: "oklch(0.93 0.005 140)" }}>All-Time</h2>
             <div className="space-y-3 flex-1">
-              <div className="p-4 rounded-xl" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.18)" }}>
-                <p className="text-[10px] font-semibold mb-1.5 tracking-wide" style={{ color: "rgba(52,211,153,0.7)" }}>AI Resolved</p>
-                <p className="text-4xl font-bold font-mono-id leading-none tabular-nums" style={{ color: "#34D399" }}>{autoResolvedAll}</p>
-                <p className="text-[11px] mt-1.5" style={{ color: "rgba(16,185,129,0.5)" }}>claims processed by AI</p>
+              {/* AI Resolved */}
+              <div className="p-4 rounded-lg"
+                style={{
+                  background: "oklch(0.72 0.18 142 / 0.07)",
+                  border: "1px solid oklch(0.72 0.18 142 / 0.20)",
+                }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.72 0.18 142)" }} />
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "oklch(0.72 0.18 142 / 0.70)" }}>
+                    AI Resolved
+                  </p>
+                </div>
+                <p className="text-3xl font-bold font-mono-id leading-none tabular-nums"
+                  style={{ color: "oklch(0.82 0.16 142)" }}>
+                  {autoResolvedAll}
+                </p>
+                <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.72 0.18 142 / 0.50)" }}>
+                  claims processed by AI
+                </p>
               </div>
-              <div className="p-4 rounded-xl" style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)" }}>
-                <p className="text-[10px] font-semibold mb-1.5 tracking-wide" style={{ color: "rgba(129,140,248,0.7)" }}>Total Claims</p>
-                <p className="text-4xl font-bold font-mono-id leading-none tabular-nums" style={{ color: "#818CF8" }}>{totalClaims}</p>
-                <p className="text-[11px] mt-1.5" style={{ color: "rgba(99,102,241,0.5)" }}>ever submitted</p>
+              {/* Total claims */}
+              <div className="p-4 rounded-lg"
+                style={{
+                  background: "oklch(1.00 0.000 0 / 0.03)",
+                  border: "1px solid oklch(1.00 0.000 0 / 0.09)",
+                }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.42 0.006 140)" }} />
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "oklch(0.42 0.006 140)" }}>
+                    Total Claims
+                  </p>
+                </div>
+                <p className="text-3xl font-bold font-mono-id leading-none tabular-nums"
+                  style={{ color: "oklch(0.62 0.010 140)" }}>
+                  {totalClaims}
+                </p>
+                <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+                  ever submitted
+                </p>
               </div>
             </div>
-            <Link href="/claims" className="mt-5 text-[11px] font-medium transition-colors hover:opacity-80" style={{ color: "#6366F1" }}>Browse all claims →</Link>
+            <Link href="/claims"
+              className="mt-4 text-[11px] font-medium transition-opacity hover:opacity-70"
+              style={{ color: "oklch(0.72 0.18 142)" }}>
+              Browse all claims →
+            </Link>
           </section>
         </div>
 
         {/* CTAs */}
-        <section className="flex flex-wrap gap-3 pb-4 animate-fade-up-4">
+        <section className="flex flex-wrap gap-3 pb-2 animate-fade-up-4">
           <Link href="/claims/new"
-            className="flex items-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 btn-primary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-bold transition-all duration-200 btn-primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
             Submit New Claim
           </Link>
           <Link href="/review"
-            className="flex items-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200"
-            style={{ background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", color: "#FB923C" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-150"
+            style={{
+              background: "oklch(0.80 0.13 78 / 0.10)",
+              border: "1px solid oklch(0.80 0.13 78 / 0.28)",
+              color: "oklch(0.88 0.11 78)",
+            }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
             Review Queue
             {stats.pending > 0 && (
-              <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ background: "#F97316", boxShadow: "0 2px 8px rgba(249,115,22,0.4)" }}>
+              <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                style={{
+                  background: "oklch(0.80 0.13 78)",
+                  color: "oklch(0.09 0.000 0)",
+                  boxShadow: "0 1px 6px oklch(0.80 0.13 78 / 0.50)",
+                }}>
                 {stats.pending}
               </span>
             )}
           </Link>
           <Link href="/claims"
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition-all duration-200 btn-ghost">
+            className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-medium transition-all duration-150 btn-ghost">
             All Claims
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
           </Link>
         </section>
+
       </main>
     </div>
   );

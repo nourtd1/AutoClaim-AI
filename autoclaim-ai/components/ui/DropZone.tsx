@@ -87,8 +87,12 @@ export default function DropZone({ onSuccess, onError }: DropZoneProps) {
         onDrop={onDrop} onDragOver={onDragOver} onDragLeave={onDragLeave}
         className="relative flex flex-col items-center justify-center rounded-xl px-6 py-10 transition-all duration-200"
         style={{
-          background: isDragging ? "rgba(99,102,241,0.1)" : file ? "rgba(16,185,129,0.06)" : "rgba(255,255,255,0.03)",
-          border: `2px dashed ${isDragging ? "rgba(99,102,241,0.5)" : file ? "rgba(16,185,129,0.35)" : "rgba(255,255,255,0.1)"}`,
+          background: isDragging
+            ? "oklch(0.72 0.18 142 / 0.09)"
+            : file
+            ? "oklch(0.72 0.18 142 / 0.06)"
+            : "oklch(1.00 0.000 0 / 0.025)",
+          border: `1px dashed ${isDragging ? "oklch(0.72 0.18 142 / 0.55)" : file ? "oklch(0.72 0.18 142 / 0.35)" : "oklch(1.00 0.000 0 / 0.12)"}`,
           cursor: file ? "default" : "pointer",
         }}>
         <input ref={inputRef} type="file" accept=".pdf,.txt,application/pdf,text/plain"
@@ -96,24 +100,39 @@ export default function DropZone({ onSuccess, onError }: DropZoneProps) {
 
         {file ? (
           <div className="flex flex-col items-center gap-2 text-center">
-            <span className="text-3xl">{source === "PDF" ? "📄" : "✉️"}</span>
-            <p className="font-medium break-all" style={{ color: "#E8EBF4" }}>{file.name}</p>
-            <p className="text-sm" style={{ color: "#8B95B0" }}>{formatBytes(file.size)}</p>
+            <div className="h-10 w-10 rounded-lg flex items-center justify-center"
+              style={{ background: "oklch(0.72 0.18 142 / 0.12)", border: "1px solid oklch(0.72 0.18 142 / 0.25)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.18 142)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <p className="font-medium text-sm break-all" style={{ color: "oklch(0.93 0.005 140)" }}>{file.name}</p>
+            <p className="text-xs" style={{ color: "oklch(0.55 0.008 140)" }}>{formatBytes(file.size)}</p>
             <button type="button" onClick={(e) => { e.stopPropagation(); reset(); }}
-              className="mt-1 text-xs transition-colors hover:opacity-80" style={{ color: "#F87171" }} disabled={uploading}>
+              className="mt-1 text-xs transition-opacity hover:opacity-70"
+              style={{ color: "oklch(0.76 0.18 22)" }} disabled={uploading}>
               Remove
             </button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 text-center">
-            <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-1"
-              style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(129,140,248,0.7)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            <div className="h-11 w-11 rounded-xl flex items-center justify-center mb-1"
+              style={{
+                background: "oklch(0.72 0.18 142 / 0.08)",
+                border: "1px solid oklch(0.72 0.18 142 / 0.18)",
+              }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.18 142 / 0.65)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
             </div>
-            <p className="font-medium text-sm" style={{ color: "#E8EBF4" }}>Drag &amp; drop a PDF or email (.txt)</p>
-            <p className="text-xs" style={{ color: "#4A5568" }}>or click to browse — max 10 MB</p>
+            <p className="font-medium text-sm" style={{ color: "oklch(0.93 0.005 140)" }}>
+              Drag &amp; drop a PDF or email (.txt)
+            </p>
+            <p className="text-xs" style={{ color: "oklch(0.35 0.005 140)" }}>
+              or click to browse — max 10 MB
+            </p>
           </div>
         )}
       </div>
@@ -122,21 +141,23 @@ export default function DropZone({ onSuccess, onError }: DropZoneProps) {
       {file && (
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <label className="text-xs font-medium w-20 shrink-0" style={{ color: "#8B95B0" }}>Source</label>
+            <label className="text-xs font-medium w-20 shrink-0" style={{ color: "oklch(0.55 0.008 140)" }}>Source</label>
             <div className="flex gap-2">
               {(["PDF", "EMAIL"] as Source[]).map((s) => (
                 <button key={s} type="button" onClick={() => setSource(s)}
-                  className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-150"
+                  className="rounded-full px-3 py-1 text-xs font-medium transition-all duration-140"
                   style={source === s
-                    ? { background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.4)", color: "#818CF8" }
-                    : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#8B95B0" }}>
+                    ? { background: "oklch(0.72 0.18 142 / 0.15)", border: "1px solid oklch(0.72 0.18 142 / 0.40)", color: "oklch(0.82 0.16 142)" }
+                    : { background: "oklch(1.00 0.000 0 / 0.03)", border: "1px solid oklch(1.00 0.000 0 / 0.08)", color: "oklch(0.55 0.008 140)" }}>
                   {s}
                 </button>
               ))}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <label htmlFor="policyNumber" className="text-xs font-medium w-20 shrink-0" style={{ color: "#8B95B0" }}>Policy #</label>
+            <label htmlFor="policyNumber" className="text-xs font-medium w-20 shrink-0" style={{ color: "oklch(0.55 0.008 140)" }}>
+              Policy #
+            </label>
             <input id="policyNumber" type="text" placeholder="Optional — extracted if blank"
               value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)} disabled={uploading}
               className="flex-1 input-dark text-sm px-3 py-1.5" />
@@ -147,48 +168,68 @@ export default function DropZone({ onSuccess, onError }: DropZoneProps) {
       {/* Progress */}
       {uploading && (
         <div className="space-y-1">
-          <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "oklch(1.00 0.000 0 / 0.09)" }}>
             <div className="h-full rounded-full transition-all duration-300"
-              style={{ width: `${progress}%`, background: "linear-gradient(90deg,#6366F1,#818CF8)", boxShadow: "0 0 8px rgba(99,102,241,0.4)" }} />
+              style={{
+                width: `${progress}%`,
+                background: "oklch(0.72 0.18 142)",
+                boxShadow: "0 0 8px oklch(0.72 0.18 142 / 0.40)",
+              }} />
           </div>
-          <p className="text-xs text-right font-mono-id tabular-nums" style={{ color: "#4A5568" }}>{progress}%</p>
+          <p className="text-xs text-right font-mono-id tabular-nums" style={{ color: "oklch(0.35 0.005 140)" }}>
+            {progress}%
+          </p>
         </div>
       )}
 
       {/* Upload button */}
       {file && !result && (
         <button type="button" onClick={upload} disabled={uploading}
-          className="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40 transition-all duration-200 btn-primary">
+          className="w-full rounded-lg px-4 py-2.5 text-sm font-bold disabled:opacity-40 transition-all duration-200 btn-primary">
           {uploading ? "Uploading…" : "Upload & Process"}
         </button>
       )}
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#F87171" }}>
+        <div className="rounded-lg px-4 py-3 text-sm"
+          style={{
+            background: "oklch(0.68 0.22 22 / 0.09)",
+            border: "1px solid oklch(0.68 0.22 22 / 0.28)",
+            color: "oklch(0.76 0.18 22)",
+          }}>
           {error}
         </div>
       )}
 
       {/* Success */}
       {result && (
-        <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
-          <p className="text-sm font-semibold" style={{ color: "#34D399" }}>{result.message}</p>
-          <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: "#8B95B0" }}>
+        <div className="rounded-xl p-4 space-y-3"
+          style={{
+            background: "oklch(0.72 0.18 142 / 0.08)",
+            border: "1px solid oklch(0.72 0.18 142 / 0.25)",
+          }}>
+          <p className="text-sm font-semibold" style={{ color: "oklch(0.82 0.16 142)" }}>{result.message}</p>
+          <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: "oklch(0.55 0.008 140)" }}>
             <span className="font-medium">Claim ID:</span>
             <span className="font-mono-id">{result.claim.id.slice(0, 8)}…</span>
             <span className="font-medium">Policy:</span>
             <span>{result.claim.policyNumber}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium" style={{ color: "#8B95B0" }}>Status:</span>
+            <span className="font-medium" style={{ color: "oklch(0.55 0.008 140)" }}>Status:</span>
             <span className="rounded-full px-2 py-0.5 font-semibold"
-              style={{ background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34D399" }}>
+              style={{
+                background: "oklch(0.72 0.18 142 / 0.12)",
+                border: "1px solid oklch(0.72 0.18 142 / 0.28)",
+                color: "oklch(0.82 0.16 142)",
+              }}>
               {result.claim.status}
             </span>
           </div>
           <button type="button" onClick={reset}
-            className="mt-1 text-xs transition-colors hover:opacity-80" style={{ color: "#6366F1" }}>
+            className="mt-1 text-xs transition-opacity hover:opacity-70"
+            style={{ color: "oklch(0.72 0.18 142)" }}>
             Upload another file
           </button>
         </div>

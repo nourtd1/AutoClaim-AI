@@ -5,16 +5,26 @@ import PriorityBadge from "./PriorityBadge";
 
 interface ClaimCardProps { claim: Claim; }
 
-function fmt(iso: string) { return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" }); }
-function fmtAmount(amount: number, currency: string) { return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount); }
+function fmt(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" });
+}
+function fmtAmount(amount: number, currency: string) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+}
 
 const STAGE_STEPS = ["INTAKE", "EXTRACTION", "VALIDATION", "EXCEPTION_ROUTING", "HUMAN_REVIEW", "RESOLUTION"];
 
 const BAR_COLOR: Record<string, string> = {
-  APPROVED: "#10B981", REJECTED: "#EF4444", ESCALATED: "#F43F5E", DEFAULT: "#6366F1",
+  APPROVED: "oklch(0.72 0.18 142)",
+  REJECTED: "oklch(0.68 0.22 22)",
+  ESCALATED: "oklch(0.70 0.19 12)",
+  DEFAULT: "oklch(0.72 0.18 142 / 0.60)",
 };
 const AMOUNT_COLOR: Record<string, string> = {
-  APPROVED: "#34D399", REJECTED: "#F87171", ESCALATED: "#FB7185", DEFAULT: "#818CF8",
+  APPROVED: "oklch(0.82 0.16 142)",
+  REJECTED: "oklch(0.76 0.18 22)",
+  ESCALATED: "oklch(0.78 0.15 12)",
+  DEFAULT: "oklch(0.72 0.18 142 / 0.80)",
 };
 
 export default function ClaimCard({ claim }: ClaimCardProps) {
@@ -25,16 +35,20 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
 
   return (
     <Link href={`/claims/${claim.id}`} className="block group">
-      <div className="claim-card rounded-xl2 p-4 space-y-3.5 relative overflow-hidden">
-        {/* Hover top glow line */}
-        <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(99,102,241,0.5), transparent)" }} />
+      <div className="claim-card rounded-xl p-4 space-y-3.5 relative overflow-hidden">
+        {/* Top glow line on hover */}
+        <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{ background: "linear-gradient(90deg, transparent, oklch(0.72 0.18 142 / 0.50), transparent)" }} />
 
-        {/* Name + status */}
+        {/* Claimant + status */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-semibold text-sm truncate" style={{ color: "#E8EBF4" }}>{claim.claimantName}</p>
-            <p className="font-mono-id text-[11px] mt-0.5" style={{ color: "#4A5568" }}>{claim.policyNumber}</p>
+            <p className="font-semibold text-sm truncate" style={{ color: "oklch(0.93 0.005 140)" }}>
+              {claim.claimantName}
+            </p>
+            <p className="font-mono-id text-[11px] mt-0.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+              {claim.policyNumber}
+            </p>
           </div>
           <StatusBadge status={claim.status} size="sm" />
         </div>
@@ -44,7 +58,12 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
           <span className="font-mono-id text-base font-bold tabular-nums" style={{ color: amtC }}>
             {fmtAmount(claim.claimAmount, claim.currency)}
           </span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#8B95B0" }}>
+          <span className="text-[11px] px-2 py-0.5 rounded-full"
+            style={{
+              background: "oklch(1.00 0.000 0 / 0.04)",
+              border: "1px solid oklch(1.00 0.000 0 / 0.08)",
+              color: "oklch(0.55 0.008 140)",
+            }}>
             {claim.claimType.replace(/_/g, " ")}
           </span>
         </div>
@@ -52,17 +71,24 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
         {/* Priority + date */}
         <div className="flex items-center justify-between">
           <PriorityBadge priority={claim.priority} size="sm" />
-          <span className="text-[11px] font-mono-id tabular-nums" style={{ color: "#4A5568" }}>{fmt(claim.createdAt)}</span>
+          <span className="text-[11px] font-mono-id tabular-nums" style={{ color: "oklch(0.35 0.005 140)" }}>
+            {fmt(claim.createdAt)}
+          </span>
         </div>
 
-        {/* Progress bar */}
+        {/* Stage progress */}
         <div className="space-y-1.5">
-          <div className="h-1 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div className="h-full rounded-full animate-bar" style={{ width: `${pct}%`, background: bar, boxShadow: pct > 0 ? `0 0 6px ${bar}50` : "none" }} />
+          <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "oklch(1.00 0.000 0 / 0.10)" }}>
+            <div className="h-full rounded-full animate-bar"
+              style={{
+                width: `${pct}%`,
+                background: bar,
+                boxShadow: pct > 0 ? `0 0 6px ${bar}` : "none",
+              }} />
           </div>
-          <div className="flex justify-between text-[10px] font-mono-id" style={{ color: "#3A4155" }}>
+          <div className="flex justify-between text-[10px] font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>
             <span>INTAKE</span>
-            <span style={{ color: pct > 0 ? bar : "#3A4155" }}>{pct}%</span>
+            <span style={{ color: pct > 0 ? bar : "oklch(0.30 0.004 140)" }}>{pct}%</span>
             <span>RESOLUTION</span>
           </div>
         </div>

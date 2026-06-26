@@ -14,10 +14,10 @@ interface ToastProps {
 }
 
 const TYPE_STYLE: Record<string, { bg: string; border: string; color: string }> = {
-  info:    { bg: "rgba(59,130,246,0.1)",  border: "rgba(59,130,246,0.25)",  color: "#60A5FA" },
-  success: { bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)",  color: "#34D399" },
-  warning: { bg: "rgba(249,115,22,0.1)",  border: "rgba(249,115,22,0.25)",  color: "#FB923C" },
-  error:   { bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.25)",   color: "#F87171" },
+  info:    { bg: "oklch(0.70 0.17 230 / 0.10)", border: "oklch(0.70 0.17 230 / 0.28)", color: "oklch(0.75 0.13 230)" },
+  success: { bg: "oklch(0.72 0.18 142 / 0.10)", border: "oklch(0.72 0.18 142 / 0.28)", color: "oklch(0.82 0.16 142)" },
+  warning: { bg: "oklch(0.80 0.13 78 / 0.10)",  border: "oklch(0.80 0.13 78 / 0.28)",  color: "oklch(0.88 0.11 78)" },
+  error:   { bg: "oklch(0.68 0.22 22 / 0.10)",  border: "oklch(0.68 0.22 22 / 0.28)",  color: "oklch(0.76 0.18 22)" },
 };
 
 function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => void }) {
@@ -26,13 +26,21 @@ function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => voi
     return () => clearTimeout(t);
   }, [onDismiss]);
 
-  const s = TYPE_STYLE[msg.type ?? "info"] ?? { bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.25)", color: "#60A5FA" };
+  const s = TYPE_STYLE[msg.type ?? "info"] ?? TYPE_STYLE.info;
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm max-w-sm"
-      style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color, animation: "toast-in 0.25s ease forwards", backdropFilter: "blur(16px)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
-      <p className="flex-1" style={{ color: "#E8EBF4" }}>{msg.message}</p>
-      <button onClick={onDismiss} className="transition-opacity hover:opacity-100 opacity-50 text-lg leading-none"
+      style={{
+        background: s.bg,
+        border: `1px solid ${s.border}`,
+        color: s.color,
+        animation: "toast-in 0.22s var(--ease-out-expo) forwards",
+        backdropFilter: "blur(16px)",
+        boxShadow: "0 8px 32px oklch(0 0 0 / 0.50)",
+      }}>
+      <p className="flex-1" style={{ color: "oklch(0.93 0.005 140)" }}>{msg.message}</p>
+      <button onClick={onDismiss}
+        className="transition-opacity hover:opacity-100 opacity-45 text-lg leading-none"
         style={{ color: s.color }}>×</button>
     </div>
   );

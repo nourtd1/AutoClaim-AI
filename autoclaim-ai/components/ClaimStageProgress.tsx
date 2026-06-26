@@ -62,25 +62,27 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
   const stageIdx = STAGES.findIndex(s => s.key === activeStage);
 
   const pill = (() => {
-    if (claimStatus === "APPROVED")  return { bg: "rgba(16,185,129,0.12)",  border: "rgba(16,185,129,0.3)",  color: "#34D399", label: "APPROVED" };
-    if (claimStatus === "REJECTED")  return { bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.3)",   color: "#F87171", label: "REJECTED" };
-    if (claimStatus === "ESCALATED") return { bg: "rgba(244,63,94,0.12)",   border: "rgba(244,63,94,0.3)",   color: "#FB7185", label: "ESCALATED" };
-    if (connected)                   return { bg: "rgba(99,102,241,0.12)",  border: "rgba(99,102,241,0.3)",  color: "#818CF8", label: "LIVE" };
-    return                                  { bg: "rgba(99,102,241,0.06)",  border: "rgba(99,102,241,0.15)", color: "rgba(129,140,248,0.5)", label: "Connecting…" };
+    if (claimStatus === "APPROVED")  return { bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.30)", color: "oklch(0.82 0.16 142)", label: "APPROVED" };
+    if (claimStatus === "REJECTED")  return { bg: "oklch(0.68 0.22 22 / 0.10)",  border: "oklch(0.68 0.22 22 / 0.30)",  color: "oklch(0.76 0.18 22)",  label: "REJECTED" };
+    if (claimStatus === "ESCALATED") return { bg: "oklch(0.70 0.19 12 / 0.10)",  border: "oklch(0.70 0.19 12 / 0.30)",  color: "oklch(0.78 0.15 12)",  label: "ESCALATED" };
+    if (connected)                   return { bg: "oklch(0.72 0.18 142 / 0.10)", border: "oklch(0.72 0.18 142 / 0.28)", color: "oklch(0.72 0.18 142)", label: "LIVE" };
+    return                                  { bg: "oklch(0.72 0.18 142 / 0.06)", border: "oklch(0.72 0.18 142 / 0.14)", color: "oklch(0.72 0.18 142 / 0.50)", label: "Connecting…" };
   })();
 
+  const progressPct = stageIdx <= 0 ? 0 : Math.min((stageIdx / (STAGES.length - 1)) * 90, 90);
+
   return (
-    <div className="card-glow rounded-xl p-5 mb-6">
+    <div className="card-glow rounded-xl p-5 mb-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="h-6 w-6 rounded-md flex items-center justify-center"
+            style={{ background: "oklch(0.72 0.18 142 / 0.10)", border: "1px solid oklch(0.72 0.18 142 / 0.22)" }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.18 142)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
             </svg>
           </div>
-          <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(129,140,248,0.8)" }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "oklch(0.72 0.18 142 / 0.75)" }}>
             Maestro Pipeline
           </h3>
         </div>
@@ -92,15 +94,17 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
         </div>
       </div>
 
-      {/* Stages */}
+      {/* Stage track */}
       <div className="relative flex justify-between items-start">
-        <div className="absolute top-4 left-4 right-4 h-px" style={{ background: "rgba(99,102,241,0.1)" }} aria-hidden />
+        {/* Track bg */}
+        <div className="absolute top-4 left-4 right-4 h-px" style={{ background: "oklch(0.72 0.18 142 / 0.10)" }} aria-hidden />
+        {/* Progress fill */}
         <div className="absolute top-4 left-4 h-px"
           style={{
-            background: "linear-gradient(90deg,#6366F1,#818CF8)",
-            width: stageIdx <= 0 ? "0%" : `${Math.min((stageIdx / (STAGES.length - 1)) * 90, 90)}%`,
-            boxShadow: "0 0 8px rgba(99,102,241,0.4)",
-            transition: "width 600ms cubic-bezier(0.16,1,0.3,1)",
+            background: "linear-gradient(90deg, oklch(0.72 0.18 142), oklch(0.82 0.16 142))",
+            width: `${progressPct}%`,
+            boxShadow: "0 0 8px oklch(0.72 0.18 142 / 0.40)",
+            transition: "width 550ms cubic-bezier(0.16,1,0.3,1)",
           }} aria-hidden />
 
         {STAGES.map((stage, idx) => {
@@ -110,21 +114,23 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
             <div key={stage.key} className="relative z-10 flex flex-col items-center flex-1">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{
-                  transition: "all 400ms cubic-bezier(0.16,1,0.3,1)",
-                  ...(isCompleted ? { background: "rgba(99,102,241,0.2)", border: "2px solid #6366F1", color: "#818CF8" }
-                    : isActive   ? { background: "linear-gradient(135deg,#6366F1,#7C3AED)", border: "2px solid rgba(99,102,241,0.5)", color: "#fff", boxShadow: "0 0 16px rgba(99,102,241,0.5), 0 0 0 4px rgba(99,102,241,0.12)", transform: "scale(1.15)" }
-                    :              { background: "rgba(99,102,241,0.04)", border: "2px solid rgba(99,102,241,0.12)", color: "rgba(99,102,241,0.3)" }),
+                  transition: "all 350ms cubic-bezier(0.16,1,0.3,1)",
+                  ...(isCompleted
+                    ? { background: "oklch(0.72 0.18 142 / 0.18)", border: "2px solid oklch(0.72 0.18 142)", color: "oklch(0.82 0.16 142)" }
+                    : isActive
+                    ? { background: "oklch(0.72 0.18 142)", border: "2px solid oklch(0.72 0.18 142 / 0.50)", color: "oklch(0.09 0.000 0)", boxShadow: "0 0 18px oklch(0.72 0.18 142 / 0.50), 0 0 0 4px oklch(0.72 0.18 142 / 0.12)", transform: "scale(1.15)" }
+                    : { background: "oklch(0.72 0.18 142 / 0.04)", border: "2px solid oklch(0.72 0.18 142 / 0.12)", color: "oklch(0.72 0.18 142 / 0.28)" }),
                 }}>
                 {isCompleted ? "✓" : idx + 1}
               </div>
               <span className="mt-2 text-[10px] text-center leading-tight font-semibold transition-colors"
-                style={{ color: isActive ? "#818CF8" : isCompleted ? "rgba(99,102,241,0.6)" : "rgba(99,102,241,0.25)" }}>
+                style={{ color: isActive ? "oklch(0.82 0.16 142)" : isCompleted ? "oklch(0.72 0.18 142 / 0.60)" : "oklch(0.72 0.18 142 / 0.25)" }}>
                 {stage.label}
               </span>
               <span className="mt-1 text-[9px] px-1.5 py-px rounded-full"
                 style={stage.type === "manual"
-                  ? { background: "rgba(245,158,11,0.08)", color: "#FCD34D", border: "1px solid rgba(245,158,11,0.2)" }
-                  : { background: "rgba(99,102,241,0.08)", color: "rgba(129,140,248,0.6)", border: "1px solid rgba(99,102,241,0.15)" }}>
+                  ? { background: "oklch(0.80 0.13 78 / 0.09)", color: "oklch(0.88 0.11 78)", border: "1px solid oklch(0.80 0.13 78 / 0.22)" }
+                  : { background: "oklch(0.72 0.18 142 / 0.07)", color: "oklch(0.72 0.18 142 / 0.60)", border: "1px solid oklch(0.72 0.18 142 / 0.15)" }}>
                 {stage.type === "manual" ? "Manual" : "Auto"}
               </span>
             </div>
@@ -134,22 +140,28 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
 
       {/* Status message */}
       {!done && activeStage === "HUMAN_REVIEW" && (
-        <div className="mt-5 text-xs text-center py-2.5 px-4 rounded-xl flex items-center justify-center gap-2"
-          style={{ background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.18)", color: "#FCD34D" }}>
+        <div className="mt-5 text-xs text-center py-2.5 px-4 rounded-lg flex items-center justify-center gap-2"
+          style={{
+            background: "oklch(0.80 0.13 78 / 0.07)",
+            border: "1px solid oklch(0.80 0.13 78 / 0.20)",
+            color: "oklch(0.88 0.11 78)",
+          }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           Awaiting adjuster decision — reviewer has been notified
         </div>
       )}
       {done && (
-        <div className="mt-5 text-xs text-center py-2.5 px-4 rounded-xl animate-slide-up-in"
+        <div className="mt-5 text-xs text-center py-2.5 px-4 rounded-lg animate-slide-up-in"
           style={
-            claimStatus === "APPROVED" ? { background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.2)", color: "#34D399" } :
-            claimStatus === "REJECTED" ? { background: "rgba(239,68,68,0.07)",  border: "1px solid rgba(239,68,68,0.2)",  color: "#F87171" } :
-                                         { background: "rgba(244,63,94,0.07)",  border: "1px solid rgba(244,63,94,0.2)",  color: "#FB7185" }
+            claimStatus === "APPROVED"
+              ? { background: "oklch(0.72 0.18 142 / 0.07)", border: "1px solid oklch(0.72 0.18 142 / 0.22)", color: "oklch(0.82 0.16 142)" }
+              : claimStatus === "REJECTED"
+              ? { background: "oklch(0.68 0.22 22 / 0.07)", border: "1px solid oklch(0.68 0.22 22 / 0.22)", color: "oklch(0.76 0.18 22)" }
+              : { background: "oklch(0.70 0.19 12 / 0.07)", border: "1px solid oklch(0.70 0.19 12 / 0.22)", color: "oklch(0.78 0.15 12)" }
           }>
-          {claimStatus === "APPROVED" ? "🎉 Claim approved and settled" :
-           claimStatus === "REJECTED" ? "❌ Claim rejected" :
-                                        "⬆️ Escalated for senior review"}
+          {claimStatus === "APPROVED" ? "✓ Claim approved and settled" :
+           claimStatus === "REJECTED" ? "✗ Claim rejected" :
+                                        "↑ Escalated for senior review"}
         </div>
       )}
     </div>

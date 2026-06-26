@@ -4,13 +4,13 @@ interface StatusBadgeProps { status: ClaimStatus; size?: "sm" | "md"; }
 type S = { bg: string; border: string; color: string; dot: string; animate?: boolean };
 
 const STYLES: Record<ClaimStatus, S> = {
-  SUBMITTED:      { bg: "rgba(74,85,104,0.15)",   border: "rgba(74,85,104,0.3)",   color: "#8B95B0", dot: "#4A5568" },
-  EXTRACTING:     { bg: "rgba(59,130,246,0.12)",  border: "rgba(59,130,246,0.25)", color: "#60A5FA", dot: "#3B82F6", animate: true },
-  VALIDATING:     { bg: "rgba(99,102,241,0.12)",  border: "rgba(99,102,241,0.25)", color: "#818CF8", dot: "#6366F1", animate: true },
-  PENDING_REVIEW: { bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.25)", color: "#FB923C", dot: "#F97316" },
-  APPROVED:       { bg: "rgba(16,185,129,0.12)",  border: "rgba(16,185,129,0.25)", color: "#34D399", dot: "#10B981" },
-  REJECTED:       { bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.25)",  color: "#F87171", dot: "#EF4444" },
-  ESCALATED:      { bg: "rgba(244,63,94,0.12)",   border: "rgba(244,63,94,0.25)",  color: "#FB7185", dot: "#F43F5E" },
+  SUBMITTED:      { bg: "oklch(0.42 0.006 140 / 0.14)", border: "oklch(0.42 0.006 140 / 0.28)", color: "oklch(0.62 0.010 140)", dot: "oklch(0.42 0.006 140)" },
+  EXTRACTING:     { bg: "oklch(0.70 0.17 230 / 0.12)", border: "oklch(0.70 0.17 230 / 0.28)", color: "oklch(0.75 0.13 230)", dot: "oklch(0.70 0.17 230)", animate: true },
+  VALIDATING:     { bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.28)", color: "oklch(0.82 0.16 142)", dot: "oklch(0.72 0.18 142)", animate: true },
+  PENDING_REVIEW: { bg: "oklch(0.80 0.13 78 / 0.11)",  border: "oklch(0.80 0.13 78 / 0.28)",  color: "oklch(0.88 0.11 78)",  dot: "oklch(0.80 0.13 78)" },
+  APPROVED:       { bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.28)", color: "oklch(0.82 0.16 142)", dot: "oklch(0.72 0.18 142)" },
+  REJECTED:       { bg: "oklch(0.68 0.22 22 / 0.10)",  border: "oklch(0.68 0.22 22 / 0.28)",  color: "oklch(0.76 0.18 22)",  dot: "oklch(0.68 0.22 22)" },
+  ESCALATED:      { bg: "oklch(0.70 0.19 12 / 0.10)",  border: "oklch(0.70 0.19 12 / 0.28)",  color: "oklch(0.78 0.15 12)",  dot: "oklch(0.70 0.19 12)" },
 };
 
 export default function StatusBadge({ status, size = "md" }: StatusBadgeProps) {

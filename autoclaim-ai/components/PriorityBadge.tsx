@@ -4,10 +4,10 @@ interface PriorityBadgeProps { priority: ClaimPriority; size?: "sm" | "md"; }
 type S = { bg: string; border: string; color: string; dot: string };
 
 const STYLES: Record<ClaimPriority, S> = {
-  LOW:      { bg: "rgba(74,85,104,0.12)",   border: "rgba(74,85,104,0.25)",  color: "#8B95B0", dot: "#4A5568" },
-  MEDIUM:   { bg: "rgba(234,179,8,0.1)",    border: "rgba(234,179,8,0.25)",  color: "#FCD34D", dot: "#EAB308" },
-  HIGH:     { bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.25)", color: "#FB923C", dot: "#F97316" },
-  CRITICAL: { bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.3)",   color: "#F87171", dot: "#EF4444" },
+  LOW:      { bg: "oklch(0.42 0.006 140 / 0.12)", border: "oklch(0.42 0.006 140 / 0.22)", color: "oklch(0.55 0.008 140)", dot: "oklch(0.38 0.005 140)" },
+  MEDIUM:   { bg: "oklch(0.80 0.13 78 / 0.10)",  border: "oklch(0.80 0.13 78 / 0.24)",  color: "oklch(0.88 0.11 78)",  dot: "oklch(0.80 0.13 78)" },
+  HIGH:     { bg: "oklch(0.68 0.22 40 / 0.11)",  border: "oklch(0.68 0.22 40 / 0.28)",  color: "oklch(0.78 0.18 40)",  dot: "oklch(0.68 0.22 40)" },
+  CRITICAL: { bg: "oklch(0.68 0.22 22 / 0.12)",  border: "oklch(0.68 0.22 22 / 0.32)",  color: "oklch(0.76 0.18 22)",  dot: "oklch(0.68 0.22 22)" },
 };
 
 export default function PriorityBadge({ priority, size = "md" }: PriorityBadgeProps) {
