@@ -36,8 +36,6 @@ function getClient(): { messages: ClientMessages; model: string } {
   return { messages: client.messages as unknown as ClientMessages, model: DIRECT_MODEL };
 }
 
-const { messages: anthropicMessages, model: MODEL } = getClient();
-
 // ── Extraction ────────────────────────────────────────────────────────────────
 
 const EXTRACTION_SYSTEM_PROMPT = `Tu es un agent d'extraction pour un système de gestion de sinistres d'assurance.
@@ -71,6 +69,7 @@ export async function extractClaimData(claimId: string): Promise<ExtractedData> 
     claim.claimAmount   ? `Montant réclamé: ${claim.claimAmount} ${claim.currency}` : null,
   ].filter(Boolean).join("\n");
 
+  const { messages: anthropicMessages, model: MODEL } = getClient();
   const message = await anthropicMessages.create({
     model: MODEL, max_tokens: 1024,
     system: EXTRACTION_SYSTEM_PROMPT,
