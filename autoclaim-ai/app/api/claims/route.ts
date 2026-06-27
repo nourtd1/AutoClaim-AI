@@ -3,6 +3,8 @@ import { initDb, getAllClaims, createClaim, addStageEvent } from "@/lib/db";
 import { CreateClaimSchema, ClaimFilterSchema } from "@/lib/validation";
 import type { ClaimStatus, ClaimPriority } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   await initDb();
   try {

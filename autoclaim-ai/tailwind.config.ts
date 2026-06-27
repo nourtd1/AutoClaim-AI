@@ -18,8 +18,8 @@ const config: Config = {
         /* ── Text ── */
         text:    "oklch(0.93 0.008 250)",
         "text-2": "oklch(0.65 0.012 250)",
-        "text-3": "oklch(0.44 0.009 250)",
-        "text-4": "oklch(0.30 0.006 250)",
+        "text-3": "oklch(0.58 0.010 250)",
+        "text-4": "oklch(0.50 0.008 250)",
 
         /* ── Brand green — primary accent, slightly cooler ── */
         green: {

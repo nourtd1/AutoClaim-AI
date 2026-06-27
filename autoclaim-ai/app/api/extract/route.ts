@@ -3,6 +3,8 @@ import { initDb } from "@/lib/db";
 import { extractClaimData, validateClaim } from "@/lib/agents";
 import { getClaimById } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   await initDb();
   let claimId: string;

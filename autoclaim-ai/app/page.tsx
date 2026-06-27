@@ -254,10 +254,10 @@ export default async function DashboardPage() {
                     <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "var(--border-mid)" }}>
                       <div className="h-full rounded-full animate-bar"
                         style={{
-                          width: `${barPct}%`,
+                          "--bar-scale": barPct / 100,
                           background: color,
                           boxShadow: count > 0 ? `0 0 6px ${color}` : "none",
-                        }} />
+                        } as React.CSSProperties} />
                     </div>
                   </li>
                 );

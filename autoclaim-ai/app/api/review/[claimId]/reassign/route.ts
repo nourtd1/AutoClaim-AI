@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { initDb, getClaimById, getReviewerById, assignReviewer, addStageEvent } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const ReassignSchema = z.object({ reviewerId: z.string().min(1, "reviewerId is required") });
 
 export async function POST(req: NextRequest, { params }: { params: { claimId: string } }) {

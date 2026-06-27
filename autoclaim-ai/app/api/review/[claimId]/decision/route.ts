@@ -3,6 +3,8 @@ import { z } from "zod";
 import { initDb, getClaimById, getReviewerById, getReviewersByRole, updateClaimStatus, appendReviewNotes, assignReviewer, addStageEvent, updateClaim, getMaestroInstanceId } from "@/lib/db";
 import { maestroCompleteHumanReview } from "@/lib/maestro";
 
+export const dynamic = "force-dynamic";
+
 const DecisionSchema = z.object({
   decision: z.enum(["APPROVE", "REJECT", "ESCALATE", "REQUEST_MORE_INFO"]),
   reviewerId: z.string().min(1, "reviewerId is required"),

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { initDb, getDb, getClaimTimeline, getReviewerById } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const PRIORITY_ORDER: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
 
 export async function GET() {

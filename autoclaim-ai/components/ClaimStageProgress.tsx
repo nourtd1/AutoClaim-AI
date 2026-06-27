@@ -62,11 +62,11 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
   const stageIdx = STAGES.findIndex(s => s.key === activeStage);
 
   const pill = (() => {
-    if (claimStatus === "APPROVED")  return { bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.30)", color: "oklch(0.82 0.16 142)", label: "APPROVED" };
+    if (claimStatus === "APPROVED")  return { bg: "oklch(0.70 0.17 155 / 0.11)", border: "oklch(0.70 0.17 155 / 0.30)", color: "oklch(0.80 0.15 155)", label: "APPROVED" };
     if (claimStatus === "REJECTED")  return { bg: "oklch(0.68 0.22 22 / 0.10)",  border: "oklch(0.68 0.22 22 / 0.30)",  color: "oklch(0.76 0.18 22)",  label: "REJECTED" };
     if (claimStatus === "ESCALATED") return { bg: "oklch(0.70 0.19 12 / 0.10)",  border: "oklch(0.70 0.19 12 / 0.30)",  color: "oklch(0.78 0.15 12)",  label: "ESCALATED" };
-    if (connected)                   return { bg: "oklch(0.72 0.18 142 / 0.10)", border: "oklch(0.72 0.18 142 / 0.28)", color: "oklch(0.72 0.18 142)", label: "LIVE" };
-    return                                  { bg: "oklch(0.72 0.18 142 / 0.06)", border: "oklch(0.72 0.18 142 / 0.14)", color: "oklch(0.72 0.18 142 / 0.50)", label: "Connecting…" };
+    if (connected)                   return { bg: "oklch(0.70 0.17 155 / 0.10)", border: "oklch(0.70 0.17 155 / 0.28)", color: "oklch(0.70 0.17 155)", label: "LIVE" };
+    return                                  { bg: "oklch(0.70 0.17 155 / 0.06)", border: "oklch(0.70 0.17 155 / 0.14)", color: "oklch(0.70 0.17 155 / 0.50)", label: "Connecting…" };
   })();
 
   const progressPct = stageIdx <= 0 ? 0 : Math.min((stageIdx / (STAGES.length - 1)) * 90, 90);
@@ -77,12 +77,12 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-md flex items-center justify-center"
-            style={{ background: "oklch(0.72 0.18 142 / 0.10)", border: "1px solid oklch(0.72 0.18 142 / 0.22)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.18 142)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            style={{ background: "oklch(0.70 0.17 155 / 0.10)", border: "1px solid oklch(0.70 0.17 155 / 0.22)" }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="oklch(0.70 0.17 155)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
             </svg>
           </div>
-          <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "oklch(0.72 0.18 142 / 0.75)" }}>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "oklch(0.70 0.17 155 / 0.75)" }}>
             Maestro Pipeline
           </h3>
         </div>
@@ -95,15 +95,15 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
       </div>
 
       {/* Stage track */}
-      <div className="relative flex justify-between items-start">
+      <ol className="relative flex justify-between items-start" aria-label="Pipeline stages">
         {/* Track bg */}
-        <div className="absolute top-4 left-4 right-4 h-px" style={{ background: "oklch(0.72 0.18 142 / 0.10)" }} aria-hidden />
+        <div className="absolute top-4 left-4 right-4 h-px" style={{ background: "oklch(0.70 0.17 155 / 0.10)" }} aria-hidden />
         {/* Progress fill */}
         <div className="absolute top-4 left-4 h-px"
           style={{
-            background: "linear-gradient(90deg, oklch(0.72 0.18 142), oklch(0.82 0.16 142))",
+            background: "linear-gradient(90deg, oklch(0.70 0.17 155), oklch(0.80 0.15 155))",
             width: `${progressPct}%`,
-            boxShadow: "0 0 8px oklch(0.72 0.18 142 / 0.40)",
+            boxShadow: "0 0 8px oklch(0.70 0.17 155 / 0.40)",
             transition: "width 550ms cubic-bezier(0.16,1,0.3,1)",
           }} aria-hidden />
 
@@ -111,32 +111,36 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
           const isCompleted = idx < stageIdx;
           const isActive    = idx === stageIdx;
           return (
-            <div key={stage.key} className="relative z-10 flex flex-col items-center flex-1">
+            <li key={stage.key}
+              className="relative z-10 flex flex-col items-center flex-1"
+              aria-current={isActive ? "step" : undefined}
+              aria-label={`${stage.label}${isCompleted ? " (complete)" : isActive ? " (current)" : ""}`}>
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                aria-hidden
                 style={{
                   transition: "all 350ms cubic-bezier(0.16,1,0.3,1)",
                   ...(isCompleted
-                    ? { background: "oklch(0.72 0.18 142 / 0.18)", border: "2px solid oklch(0.72 0.18 142)", color: "oklch(0.82 0.16 142)" }
+                    ? { background: "oklch(0.70 0.17 155 / 0.18)", border: "2px solid oklch(0.70 0.17 155)", color: "oklch(0.80 0.15 155)" }
                     : isActive
-                    ? { background: "oklch(0.72 0.18 142)", border: "2px solid oklch(0.72 0.18 142 / 0.50)", color: "oklch(0.09 0.000 0)", boxShadow: "0 0 18px oklch(0.72 0.18 142 / 0.50), 0 0 0 4px oklch(0.72 0.18 142 / 0.12)", transform: "scale(1.15)" }
-                    : { background: "oklch(0.72 0.18 142 / 0.04)", border: "2px solid oklch(0.72 0.18 142 / 0.12)", color: "oklch(0.72 0.18 142 / 0.28)" }),
+                    ? { background: "oklch(0.70 0.17 155)", border: "2px solid oklch(0.70 0.17 155 / 0.50)", color: "oklch(0.09 0.000 0)", boxShadow: "0 0 18px oklch(0.70 0.17 155 / 0.50), 0 0 0 4px oklch(0.70 0.17 155 / 0.12)", transform: "scale(1.15)" }
+                    : { background: "oklch(0.70 0.17 155 / 0.04)", border: "2px solid oklch(0.70 0.17 155 / 0.12)", color: "oklch(0.70 0.17 155 / 0.28)" }),
                 }}>
                 {isCompleted ? "✓" : idx + 1}
               </div>
               <span className="mt-2 text-[10px] text-center leading-tight font-semibold transition-colors"
-                style={{ color: isActive ? "oklch(0.82 0.16 142)" : isCompleted ? "oklch(0.72 0.18 142 / 0.60)" : "oklch(0.72 0.18 142 / 0.25)" }}>
+                style={{ color: isActive ? "oklch(0.80 0.15 155)" : isCompleted ? "oklch(0.70 0.17 155 / 0.60)" : "oklch(0.70 0.17 155 / 0.25)" }}>
                 {stage.label}
               </span>
               <span className="mt-1 text-[9px] px-1.5 py-px rounded-full"
                 style={stage.type === "manual"
                   ? { background: "oklch(0.80 0.13 78 / 0.09)", color: "oklch(0.88 0.11 78)", border: "1px solid oklch(0.80 0.13 78 / 0.22)" }
-                  : { background: "oklch(0.72 0.18 142 / 0.07)", color: "oklch(0.72 0.18 142 / 0.60)", border: "1px solid oklch(0.72 0.18 142 / 0.15)" }}>
+                  : { background: "oklch(0.70 0.17 155 / 0.07)", color: "oklch(0.70 0.17 155 / 0.60)", border: "1px solid oklch(0.70 0.17 155 / 0.15)" }}>
                 {stage.type === "manual" ? "Manual" : "Auto"}
               </span>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
       {/* Status message */}
       {!done && activeStage === "HUMAN_REVIEW" && (
@@ -154,7 +158,7 @@ export default function ClaimStageProgress({ claimId, initialStage, initialStatu
         <div className="mt-5 text-xs text-center py-2.5 px-4 rounded-lg animate-slide-up-in"
           style={
             claimStatus === "APPROVED"
-              ? { background: "oklch(0.72 0.18 142 / 0.07)", border: "1px solid oklch(0.72 0.18 142 / 0.22)", color: "oklch(0.82 0.16 142)" }
+              ? { background: "oklch(0.70 0.17 155 / 0.07)", border: "1px solid oklch(0.70 0.17 155 / 0.22)", color: "oklch(0.80 0.15 155)" }
               : claimStatus === "REJECTED"
               ? { background: "oklch(0.68 0.22 22 / 0.07)", border: "1px solid oklch(0.68 0.22 22 / 0.22)", color: "oklch(0.76 0.18 22)" }
               : { background: "oklch(0.70 0.19 12 / 0.07)", border: "1px solid oklch(0.70 0.19 12 / 0.22)", color: "oklch(0.78 0.15 12)" }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { initDb, getClaimById, updateClaim, softDeleteClaim, getClaimTimeline } from "@/lib/db";
 import { UpdateClaimSchema } from "@/lib/validation";
 
+export const dynamic = "force-dynamic";
+
 type Params = { params: { id: string } };
 const notFound = () => NextResponse.json({ error: "Claim not found", code: "NOT_FOUND" }, { status: 404 });
 

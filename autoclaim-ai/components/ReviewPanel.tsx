@@ -38,23 +38,23 @@ function ResolutionCard({ claim }: { claim: Claim }) {
   const ok = claim.status === "APPROVED";
   return (
     <div className="rounded-xl p-5 space-y-3" style={{
-      background: ok ? "oklch(0.72 0.18 142 / 0.07)" : "oklch(0.68 0.22 22 / 0.07)",
-      border: ok ? "1px solid oklch(0.72 0.18 142 / 0.22)" : "1px solid oklch(0.68 0.22 22 / 0.22)",
+      background: ok ? "var(--green-dim)" : "oklch(0.68 0.22 22 / 0.07)",
+      border: ok ? "1px solid var(--green-border)" : "1px solid oklch(0.68 0.22 22 / 0.22)",
     }}>
       <div className="flex items-center gap-2.5">
         <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-lg"
           style={{
-            background: ok ? "oklch(0.72 0.18 142 / 0.18)" : "oklch(0.68 0.22 22 / 0.18)",
-            color: ok ? "oklch(0.82 0.16 142)" : "oklch(0.76 0.18 22)",
+            background: ok ? "var(--green-dim)" : "oklch(0.68 0.22 22 / 0.18)",
+            color: ok ? "var(--green-bright)" : "oklch(0.76 0.18 22)",
           }}>
           {ok ? "✓" : "✗"}
         </div>
         <div>
-          <p className="text-sm font-bold" style={{ color: ok ? "oklch(0.82 0.16 142)" : "oklch(0.76 0.18 22)" }}>
+          <p className="text-sm font-bold" style={{ color: ok ? "var(--green-bright)" : "oklch(0.76 0.18 22)" }}>
             Claim {ok ? "Approved" : "Rejected"}
           </p>
           {claim.resolvedAt && (
-            <p className="text-xs" style={{ color: "oklch(0.38 0.005 140)" }}>
+            <p className="text-xs" style={{ color: "var(--text-3)" }}>
               {new Date(claim.resolvedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
             </p>
           )}
@@ -62,10 +62,10 @@ function ResolutionCard({ claim }: { claim: Claim }) {
       </div>
       {claim.reviewNotes && (
         <div>
-          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: "var(--text-3)" }}>
             Reviewer notes
           </p>
-          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: "oklch(0.55 0.008 140)" }}>
+          <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-2)" }}>
             {claim.reviewNotes}
           </p>
         </div>
@@ -110,31 +110,31 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
   return (
     <div className="rounded-xl p-5 space-y-5"
       style={{
-        background: "oklch(0.72 0.18 142 / 0.04)",
-        border: "1px solid oklch(0.72 0.18 142 / 0.14)",
+        background: "var(--green-dim)",
+        border: "1px solid var(--green-border)",
       }}>
       {/* Reviewer */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color: "var(--text-3)" }}>
           Assigned Reviewer
         </p>
         {reviewer ? (
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm"
               style={{
-                background: "oklch(0.72 0.18 142 / 0.14)",
-                border: "1px solid oklch(0.72 0.18 142 / 0.28)",
-                color: "oklch(0.82 0.16 142)",
+                background: "var(--green-dim)",
+                border: "1px solid var(--green-border)",
+                color: "var(--green-bright)",
               }}>
-              {reviewer.name.slice(0,1)}
+              {reviewer.name.slice(0, 1)}
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>{reviewer.name}</p>
-              <p className="text-xs" style={{ color: "oklch(0.38 0.005 140)" }}>{reviewer.role}</p>
+              <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{reviewer.name}</p>
+              <p className="text-xs" style={{ color: "var(--text-3)" }}>{reviewer.role}</p>
             </div>
           </div>
         ) : (
-          <p className="text-xs italic" style={{ color: "oklch(0.72 0.18 142 / 0.35)" }}>Unassigned</p>
+          <p className="text-xs italic" style={{ color: "var(--text-4)" }}>Unassigned</p>
         )}
       </div>
 
@@ -142,17 +142,17 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
       <div className="rounded-lg px-4 py-3 flex items-center justify-between"
         style={{
           background: "oklch(1.00 0.000 0 / 0.03)",
-          border: "1px solid oklch(1.00 0.000 0 / 0.09)",
+          border: "1px solid var(--border)",
         }}>
-        <span className="text-xs" style={{ color: "oklch(0.42 0.006 140)" }}>Claimed amount</span>
-        <span className="font-mono-id text-sm font-bold" style={{ color: "oklch(0.82 0.16 142)" }}>
+        <span className="text-xs" style={{ color: "var(--text-3)" }}>Claimed amount</span>
+        <span className="font-mono-id text-sm font-bold" style={{ color: "var(--green-bright)" }}>
           {fmtAmount(claim.claimAmount, claim.currency)}
         </span>
       </div>
 
       {/* Decision buttons */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+        <p className="text-[10px] uppercase tracking-widest font-semibold mb-2.5" style={{ color: "var(--text-3)" }}>
           Decision
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -160,12 +160,13 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
             const active = decision === d.key;
             return (
               <button key={d.key} type="button" onClick={() => setDecision(active ? null : d.key)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-180"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
                 style={{
                   background: active ? d.style.activeBg : d.style.bg,
                   border: `1px solid ${active ? d.style.activeColor : d.style.border}`,
                   color: active ? d.style.activeColor : d.style.color,
                   boxShadow: active ? `0 0 10px ${d.style.activeBg}` : "none",
+                  outlineColor: d.style.activeColor,
                 }}>
                 {d.icon} {d.label}
               </button>
@@ -176,36 +177,48 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
 
       {/* Notes */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block"
-          style={{ color: "oklch(0.35 0.005 140)" }}>
-          Notes <span style={{ color: "oklch(0.68 0.22 22)" }}>*</span>
+        <label htmlFor="review-notes" className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block"
+          style={{ color: "var(--text-3)" }}>
+          Notes <span style={{ color: "var(--state-rejected)" }} aria-hidden>*</span>
         </label>
-        <textarea ref={notesRef} value={notes} onChange={e => setNotes(e.target.value)}
-          placeholder="Explain your decision (min. 10 characters)…" rows={3}
-          className="input-dark w-full rounded-lg text-sm px-3 py-2 resize-none" />
+        <textarea
+          id="review-notes"
+          ref={notesRef}
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          placeholder="Explain your decision (min. 10 characters)…"
+          rows={3}
+          className="input-dark w-full rounded-lg text-sm px-3 py-2 resize-none"
+        />
         <p className="mt-1 text-[10px] text-right transition-colors"
-          style={{ color: notes.trim().length >= 10 ? "oklch(0.38 0.005 140)" : "oklch(0.68 0.22 22 / 0.55)" }}>
+          style={{ color: notes.trim().length >= 10 ? "var(--text-4)" : "oklch(0.68 0.22 22 / 0.65)" }}>
           {notes.trim().length}/10 min
         </p>
       </div>
 
       {/* Adjusted amount */}
       <div>
-        <label className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block"
-          style={{ color: "oklch(0.35 0.005 140)" }}>
-          Adjusted Amount <span style={{ color: "oklch(0.72 0.18 142 / 0.35)" }}>(optional)</span>
+        <label htmlFor="review-adjusted-amount" className="text-[10px] uppercase tracking-widest font-semibold mb-1.5 block"
+          style={{ color: "var(--text-3)" }}>
+          Adjusted Amount <span style={{ color: "var(--text-4)" }}>(optional)</span>
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: "oklch(0.38 0.005 140)" }}>$</span>
-          <input type="text" value={adjustedAmount} onChange={e => setAdjustedAmount(e.target.value)}
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: "var(--text-3)" }}>$</span>
+          <input
+            id="review-adjusted-amount"
+            type="text"
+            value={adjustedAmount}
+            onChange={e => setAdjustedAmount(e.target.value)}
             placeholder={String(claim.claimAmount)}
-            className="input-dark w-full text-sm pl-6 pr-3 py-2" />
+            className="input-dark w-full text-sm pl-6 pr-3 py-2"
+          />
         </div>
       </div>
 
       {/* Error */}
       {error && (
         <div className="rounded-lg px-3 py-2.5 text-xs"
+          role="alert"
           style={{
             background: "oklch(0.68 0.22 22 / 0.09)",
             border: "1px solid oklch(0.68 0.22 22 / 0.25)",
@@ -217,23 +230,24 @@ export default function ReviewPanel({ claim, reviewer }: ReviewPanelProps) {
 
       {/* Submit */}
       <button type="button" onClick={submit} disabled={!canSubmit}
-        className="w-full rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-180 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="w-full rounded-lg px-4 py-2.5 text-sm font-bold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         style={canSubmit && activeDecision ? {
           background: activeDecision.style.activeBg,
           border: `1px solid ${activeDecision.style.activeColor}`,
           color: activeDecision.style.activeColor,
           boxShadow: `0 0 14px ${activeDecision.style.activeBg}`,
+          outlineColor: activeDecision.style.activeColor,
         } : {
-          background: "oklch(0.72 0.18 142 / 0.05)",
-          border: "1px solid oklch(0.72 0.18 142 / 0.12)",
-          color: "oklch(0.72 0.18 142 / 0.35)",
+          background: "var(--green-dim)",
+          border: "1px solid var(--green-border)",
+          color: "var(--text-4)",
         }}>
-        {submitting ? "Submitting…" : decision ? `Submit — ${DECISIONS.find(d=>d.key===decision)?.label}` : "Select a decision"}
+        {submitting ? "Submitting…" : decision ? `Submit — ${DECISIONS.find(d => d.key === decision)?.label}` : "Select a decision"}
       </button>
 
       {!reviewer && (
-        <p className="text-[10px] text-center" style={{ color: "oklch(0.80 0.13 78)" }}>
-          ⚠ No reviewer assigned — submission blocked
+        <p className="text-[10px] text-center" role="alert" style={{ color: "var(--amber)" }}>
+          No reviewer assigned — submission blocked
         </p>
       )}
     </div>

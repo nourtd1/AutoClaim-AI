@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { initDb, getClaimById } from "@/lib/db";
 import { orchestrator } from "@/lib/orchestrator";
 
+export const dynamic = "force-dynamic";
+
 // Give the Claude AI extraction + validation pipeline enough time to complete.
 export const maxDuration = 60;
 

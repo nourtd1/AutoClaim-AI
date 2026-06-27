@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initDb, getDb, createClaim, addStageEvent, createReviewer } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // POST /api/seed?secret=SEED_SECRET
 // Idempotent — checks if data already exists before inserting.
 

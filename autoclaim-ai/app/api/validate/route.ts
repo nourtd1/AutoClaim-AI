@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { initDb, getClaimById } from "@/lib/db";
 import { validateClaim } from "@/lib/agents";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   await initDb();
   let claimId: string;

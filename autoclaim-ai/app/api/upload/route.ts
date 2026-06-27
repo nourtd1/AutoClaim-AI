@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { initDb, createClaim, addDocument, addStageEvent, getDb } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 
 const MAX_FILE_SIZE  = 10 * 1024 * 1024;
 const DESCRIPTION_MAX = 2000;

@@ -175,13 +175,13 @@ export default function Sidebar() {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (
             <Link key={href} href={href}
-              className="relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-150"
+              className="relative flex flex-col items-center gap-1 px-3 py-2.5 rounded-lg transition-all duration-150 min-h-[44px] justify-center"
               style={active
                 ? { color: "var(--green-bright)", background: "var(--green-dim)" }
                 : { color: "var(--text-3)" }
               }>
               {icon}
-              <span className="text-[9px] uppercase tracking-wide font-semibold">{label.split(" ")[0]}</span>
+              <span className="text-[10px] uppercase tracking-wide font-semibold">{label.split(" ")[0]}</span>
               {href === "/review" && pendingCount !== null && pendingCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full text-[9px] font-bold text-black flex items-center justify-center px-1"
                   style={{ background: "oklch(0.80 0.13 78)" }}>

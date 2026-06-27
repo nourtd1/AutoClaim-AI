@@ -154,12 +154,17 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
               return (
                 <tr key={c.id}
                   onClick={() => window.location.href = `/claims/${c.id}`}
-                  className="cursor-pointer tr-hover animate-stagger"
-                  style={{ borderBottom: "1px solid var(--border)", "--i": i } as React.CSSProperties}>
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); window.location.href = `/claims/${c.id}`; } }}
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`View claim by ${c.claimantName}`}
+                  className="cursor-pointer tr-hover animate-stagger focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+                  style={{ borderBottom: "1px solid var(--border)", "--i": i, outlineColor: "var(--azure)" } as React.CSSProperties}>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{c.id.slice(0, 8)}…</span>
-                      <button type="button" onClick={(e) => { e.stopPropagation(); copyId(c.id); }} title="Copy full ID"
+                      <button type="button" onClick={(e) => { e.stopPropagation(); copyId(c.id); }}
+                        aria-label={copied === c.id ? "Copied" : "Copy claim ID"}
                         className="transition-colors"
                         style={{ color: copied === c.id ? "var(--azure)" : "oklch(1.00 0.000 0 / 0.20)" }}>
                         {copied === c.id

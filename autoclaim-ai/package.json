@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "tsx data/seed.ts",
-    "demo": "tsx data/demo.ts"
+    "seed": "tsx --env-file=.env.demo data/seed.ts",
+    "demo": "tsx --env-file=.env.demo data/demo.ts"
   },
   "dependencies": {
     "@anthropic-ai/bedrock-sdk": "^0.30.1",

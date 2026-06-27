@@ -40,6 +40,7 @@ function ToastItem({ msg, onDismiss }: { msg: ToastMessage; onDismiss: () => voi
       }}>
       <p className="flex-1" style={{ color: "oklch(0.93 0.005 140)" }}>{msg.message}</p>
       <button onClick={onDismiss}
+        aria-label="Dismiss notification"
         className="transition-opacity hover:opacity-100 opacity-45 text-lg leading-none"
         style={{ color: s.color }}>×</button>
     </div>

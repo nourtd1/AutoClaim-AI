@@ -43,10 +43,10 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
         {/* Claimant + status */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-semibold text-sm truncate" style={{ color: "oklch(0.93 0.005 140)" }}>
+            <p className="font-semibold text-sm truncate" style={{ color: "var(--text)" }}>
               {claim.claimantName}
             </p>
-            <p className="font-mono-id text-[11px] mt-0.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+            <p className="font-mono-id text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
               {claim.policyNumber}
             </p>
           </div>
@@ -61,8 +61,8 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
           <span className="text-[11px] px-2 py-0.5 rounded-full"
             style={{
               background: "oklch(1.00 0.000 0 / 0.04)",
-              border: "1px solid oklch(1.00 0.000 0 / 0.08)",
-              color: "oklch(0.55 0.008 140)",
+              border: "1px solid var(--border)",
+              color: "var(--text-3)",
             }}>
             {claim.claimType.replace(/_/g, " ")}
           </span>
@@ -71,7 +71,7 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
         {/* Priority + date */}
         <div className="flex items-center justify-between">
           <PriorityBadge priority={claim.priority} size="sm" />
-          <span className="text-[11px] font-mono-id tabular-nums" style={{ color: "oklch(0.35 0.005 140)" }}>
+          <span className="text-[11px] font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>
             {fmt(claim.createdAt)}
           </span>
         </div>
@@ -81,14 +81,14 @@ export default function ClaimCard({ claim }: ClaimCardProps) {
           <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "oklch(1.00 0.000 0 / 0.10)" }}>
             <div className="h-full rounded-full animate-bar"
               style={{
-                width: `${pct}%`,
+                "--bar-scale": pct / 100,
                 background: bar,
                 boxShadow: pct > 0 ? `0 0 6px ${bar}` : "none",
-              }} />
+              } as React.CSSProperties} />
           </div>
-          <div className="flex justify-between text-[10px] font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>
+          <div className="flex justify-between text-[10px] font-mono-id" style={{ color: "var(--text-4)" }}>
             <span>INTAKE</span>
-            <span style={{ color: pct > 0 ? bar : "oklch(0.30 0.004 140)" }}>{pct}%</span>
+            <span style={{ color: pct > 0 ? bar : "var(--text-4)" }}>{pct}%</span>
             <span>RESOLUTION</span>
           </div>
         </div>

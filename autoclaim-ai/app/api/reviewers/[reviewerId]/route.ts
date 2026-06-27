@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initDb, getReviewerById, setReviewerAvailability, getClaimsByReviewer } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 initDb();
 
 // GET /api/reviewers/[reviewerId]
