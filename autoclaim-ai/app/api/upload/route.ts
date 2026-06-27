@@ -132,7 +132,9 @@ export async function POST(req: NextRequest) {
   const existing = JSON.parse((rowR.rows[0] as unknown as {documents:string}).documents) as typeof claimDoc[];
   await db.execute({ sql:"UPDATE claims SET documents=?, updatedAt=? WHERE id=?", args:[JSON.stringify([...existing, claimDoc]), new Date().toISOString(), claim.id] });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
+  // Derive base URL from the incoming request so this works on Vercel, localhost, and any custom domain.
+  const reqUrl = new URL(req.url);
+  const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`;
   fetch(`${baseUrl}/api/orchestrate`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ claimId:claim.id }) })
     .catch(err => console.error("[upload] orchestrate fetch error", err));
 

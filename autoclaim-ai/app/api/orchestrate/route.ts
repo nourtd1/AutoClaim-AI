@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { initDb, getClaimById } from "@/lib/db";
 import { orchestrator } from "@/lib/orchestrator";
 
+// Give the Claude AI extraction + validation pipeline enough time to complete.
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   await initDb();
   let claimId: string;
@@ -10,9 +13,16 @@ export async function POST(req: NextRequest) {
   if (!claimId || typeof claimId !== "string") return NextResponse.json({ data: null, error: "Missing required field: claimId" }, { status: 400 });
   const claim = await getClaimById(claimId);
   if (!claim) return NextResponse.json({ data: null, error: `Claim not found: ${claimId}` }, { status: 404 });
-  orchestrator.processNewClaim(claimId).catch(err => console.error(`[POST /api/orchestrate] claimId=${claimId}`, err));
+
+  // Await the full pipeline so Vercel doesn't kill the Lambda before Claude finishes.
+  try {
+    await orchestrator.processNewClaim(claimId);
+  } catch (err) {
+    console.error(`[POST /api/orchestrate] claimId=${claimId}`, err);
+  }
+
   const state = await orchestrator.getClaimState(claimId);
-  return NextResponse.json({ data: { message: "Processing started", claimId, state }, error: null });
+  return NextResponse.json({ data: { message: "Processing complete", claimId, state }, error: null });
 }
 
 export async function GET() {

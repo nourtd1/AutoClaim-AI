@@ -112,8 +112,10 @@ export default function NewClaimPage() {
       const json = await res.json();
       if (!res.ok || json.error) throw new Error(json.error ?? "Submission failed");
       const claim = json.data as Claim;
-      void fetch("/api/orchestrate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: claim.id }) });
+      // Redirect immediately — orchestrate runs server-side after redirect
       router.push(`/claims/${claim.id}`);
+      // Fire orchestrate after redirect (non-blocking — SSE on claim page shows progress)
+      void fetch("/api/orchestrate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: claim.id }) });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
       setSubmitting(false);
@@ -176,7 +178,7 @@ export default function NewClaimPage() {
             <div className="lg:col-span-3">
               {mode === "upload" ? (
                 <DropZone onSuccess={(result) => {
-                  void fetch("/api/orchestrate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ claimId: result.claim.id }) });
+                  // upload/route.ts already fires orchestrate — just redirect
                   router.push(`/claims/${result.claim.id}`);
                 }} />
               ) : (

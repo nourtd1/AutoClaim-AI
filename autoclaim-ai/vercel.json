@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/orchestrate/route.ts": { "maxDuration": 60 },
+    "app/api/claims/[id]/stream/route.ts": { "maxDuration": 60 },
+    "app/api/upload/route.ts": { "maxDuration": 30 }
+  }
+}

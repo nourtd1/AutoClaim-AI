@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { initDb, getClaimById } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const POLL_MS = 3000;
 const TERMINAL = new Set(["APPROVED", "REJECTED", "ESCALATED"]);
