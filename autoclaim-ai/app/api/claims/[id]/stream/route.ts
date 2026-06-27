@@ -4,7 +4,7 @@ import { initDb, getClaimById } from "@/lib/db";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const POLL_MS = 3000;
+const POLL_MS = 800;
 const TERMINAL = new Set(["APPROVED", "REJECTED", "ESCALATED"]);
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {

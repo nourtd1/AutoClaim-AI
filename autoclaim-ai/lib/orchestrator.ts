@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { getClaimById, getReviewerById, addStageEvent, getAllClaims, setMaestroInstanceId } from "./db";
+import { getClaimById, getReviewerById, addStageEvent, getAllClaims, setMaestroInstanceId, updateClaimStatus } from "./db";
 import { extractClaimData, validateClaim } from "./agents";
 import { maestroStartClaim, maestroAdvanceStage } from "./maestro";
 import type { ClaimStage } from "./types";
@@ -58,7 +58,10 @@ export class ClaimOrchestrator {
     const claim = await getClaimById(claimId);
     if (!claim) throw new Error(`Claim not found: ${claimId}`);
 
+    // Step 1 — INTAKE visible in DB so SSE catches it
+    await updateClaimStatus(claimId, "SUBMITTED", "INTAKE");
     await addStageEvent({ claimId, stage: "INTAKE", status: "SUBMITTED", actor: "ROBOT", notes: "Orchestrator: workflow started" });
+    await delay(1200);
 
     const maestroInstanceId = await maestroStartClaim(claimId, {
       policyNumber: claim.policyNumber, claimantName: claim.claimantName,
@@ -66,15 +69,19 @@ export class ClaimOrchestrator {
     });
     if (maestroInstanceId) await setMaestroInstanceId(claimId, maestroInstanceId);
 
-    await delay(500);
-
+    // Step 2 — write EXTRACTING to DB before Claude runs so SSE sees it
+    await updateClaimStatus(claimId, "EXTRACTING", "EXTRACTION");
     await addStageEvent({ claimId, stage: "EXTRACTION", status: "EXTRACTING", actor: "ROBOT", notes: "Orchestrator: starting extraction" });
+    await delay(800);
     const extracted = await extractClaimData(claimId);
     await addStageEvent({ claimId, stage: "EXTRACTION", status: "VALIDATING", actor: "ROBOT", notes: `Orchestrator: extraction complete, confidence=${extracted.confidence.toFixed(2)}` });
 
     if (maestroInstanceId) await maestroAdvanceStage(maestroInstanceId, "EXTRACTION", { confidence: extracted.confidence, extractedFields: Object.keys(extracted).length });
 
+    // Step 3 — write VALIDATING to DB before validation logic runs
+    await updateClaimStatus(claimId, "VALIDATING", "VALIDATION");
     await addStageEvent({ claimId, stage: "VALIDATION", status: "VALIDATING", actor: "ROBOT", notes: "Orchestrator: starting validation" });
+    await delay(800);
     const result = await validateClaim(claimId);
 
     if (maestroInstanceId) await maestroAdvanceStage(maestroInstanceId, "VALIDATION", { isValid: result.isValid, riskScore: result.riskScore });
