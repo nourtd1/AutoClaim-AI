@@ -156,7 +156,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
                   onClick={() => window.location.href = `/claims/${c.id}`}
                   className="cursor-pointer tr-hover animate-stagger"
                   style={{ borderBottom: "1px solid var(--border)", "--i": i } as React.CSSProperties}>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{c.id.slice(0, 8)}…</span>
                       <button type="button" onClick={(e) => { e.stopPropagation(); copyId(c.id); }} title="Copy full ID"
@@ -168,16 +168,16 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <p className="font-semibold" style={{ color: "var(--text)" }}>{c.claimantName}</p>
                     <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "var(--text-3)" }}>{c.policyNumber}</p>
                   </td>
-                  <td className="px-4 py-3.5" style={{ color: "var(--text-2)" }}>{c.claimType.replace(/_/g, " ")}</td>
-                  <td className="px-4 py-3.5 text-right font-mono-id font-bold tabular-nums" style={{ color: amtColor }}>{fmtAmount(c.claimAmount, c.currency)}</td>
-                  <td className="px-4 py-3.5"><StatusBadge status={c.status} size="sm" /></td>
-                  <td className="px-4 py-3.5"><PriorityBadge priority={c.priority} size="sm" /></td>
-                  <td className="px-4 py-3.5" style={{ color: "var(--text-2)" }}>{c.stage.replace(/_/g, " ")}</td>
-                  <td className="px-4 py-3.5 text-right font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{fmtDate(c.createdAt)}</td>
+                  <td className="px-4 py-4" style={{ color: "var(--text-2)" }}>{c.claimType.replace(/_/g, " ")}</td>
+                  <td className="px-4 py-4 text-right font-mono-id font-bold tabular-nums" style={{ color: amtColor }}>{fmtAmount(c.claimAmount, c.currency)}</td>
+                  <td className="px-4 py-4"><StatusBadge status={c.status} size="sm" /></td>
+                  <td className="px-4 py-4"><PriorityBadge priority={c.priority} size="sm" /></td>
+                  <td className="px-4 py-4" style={{ color: "var(--text-2)" }}>{c.stage.replace(/_/g, " ")}</td>
+                  <td className="px-4 py-4 text-right font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{fmtDate(c.createdAt)}</td>
                 </tr>
               );
             })}
@@ -188,7 +188,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
       {/* ── Cards (mobile) ── */}
       <div className="md:hidden space-y-2">
         {pageClaims.length === 0 && (
-          <p className="text-center text-xs py-8" style={{ color: "#3A4155" }}>No claims match your filters</p>
+          <p className="text-center text-xs py-8" style={{ color: "var(--text-4)" }}>No claims match your filters</p>
         )}
         {pageClaims.map((c, i) => {
           const amtColor = AMOUNT_COLOR[c.status] ?? AMOUNT_COLOR.DEFAULT;

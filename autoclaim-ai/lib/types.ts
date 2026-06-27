@@ -173,6 +173,33 @@ export interface DocumentAttachment {
   uploadedAt: string;
 }
 
+// ── Database query row shapes ─────────────────────────────────────────────────
+
+/** Returned by `SELECT COUNT(*) as cnt FROM …` */
+export interface DbCountRow {
+  cnt: number;
+}
+
+/** Returned by `SELECT AVG(…) as avg_minutes FROM …` */
+export interface DbAvgRow {
+  avg_minutes: number | null;
+}
+
+/** Returned by `SELECT id FROM …` */
+export interface DbIdRow {
+  id: string;
+}
+
+// ── UI actor metadata (shared between dashboard and Live Feed) ────────────────
+
+export interface ActorMeta {
+  label: string;
+  symbol: string;
+  bg: string;
+  border: string;
+  color: string;
+}
+
 // ── Form / input types ────────────────────────────────────────────────────────
 
 export interface NewClaimInput {

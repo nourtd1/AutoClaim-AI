@@ -54,7 +54,7 @@ export default function TopBar({ title, subtitle, badge, actions, pending }: Top
     <header className="sticky top-0 z-40 topbar-bg">
       {/* Signal accent line at very top */}
       <div className="h-px w-full"
-        style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.72 0.18 142 / 0.45) 40%, oklch(0.72 0.18 142 / 0.45) 60%, transparent 100%)" }} />
+        style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.68 0.18 232 / 0.40) 30%, oklch(0.70 0.17 155 / 0.40) 70%, transparent 100%)" }} />
 
       <div className="px-6 py-3 flex items-center justify-between gap-4">
         {/* Left */}
@@ -62,16 +62,16 @@ export default function TopBar({ title, subtitle, badge, actions, pending }: Top
           {displayIcon && (
             <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0"
               style={{
-                background: "oklch(0.72 0.18 142 / 0.09)",
-                border: "1px solid oklch(0.72 0.18 142 / 0.22)",
-                color: "oklch(0.72 0.18 142)",
+                background: "var(--azure-dim)",
+                border: "1px solid var(--azure-border)",
+                color: "var(--azure)",
               }}>
               {displayIcon}
             </div>
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-semibold tracking-tight truncate" style={{ color: "oklch(0.93 0.005 140)" }}>
+              <h1 className="text-sm font-semibold tracking-tight truncate" style={{ color: "var(--text)" }}>
                 {displayTitle}
               </h1>
               {badge && (
@@ -86,7 +86,7 @@ export default function TopBar({ title, subtitle, badge, actions, pending }: Top
               )}
             </div>
             {displaySub && (
-              <p className="text-[11px] truncate mt-px" style={{ color: "oklch(0.42 0.007 140)" }}>{displaySub}</p>
+              <p className="text-[11px] truncate mt-px" style={{ color: "var(--text-3)" }}>{displaySub}</p>
             )}
           </div>
         </div>
@@ -96,11 +96,11 @@ export default function TopBar({ title, subtitle, badge, actions, pending }: Top
           {/* Live indicator */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full"
             style={{
-              background: "oklch(0.72 0.18 142 / 0.08)",
-              border: "1px solid oklch(0.72 0.18 142 / 0.20)",
+              background: "var(--green-dim)",
+              border: "1px solid var(--green-border)",
             }}>
-            <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "oklch(0.72 0.18 142)" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "oklch(0.72 0.18 142 / 0.85)" }}>Live</span>
+            <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "var(--green)" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "oklch(0.70 0.17 155 / 0.85)" }}>Live</span>
           </div>
 
           {/* Pending review alert */}

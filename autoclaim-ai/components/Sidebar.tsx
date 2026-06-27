@@ -70,19 +70,19 @@ export default function Sidebar() {
             {/* Icon mark: signal waveform in a dark square */}
             <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 group-hover:scale-105"
               style={{
-                background: "oklch(0.115 0.006 140)",
-                border: "1px solid oklch(0.72 0.18 142 / 0.35)",
-                boxShadow: "0 0 12px oklch(0.72 0.18 142 / 0.18)",
+                background: "var(--surface-2)",
+                border: "1px solid var(--green-border)",
+                boxShadow: "0 0 12px var(--green-glow)",
               }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M4 12h3l2-6 2 12 2-8 1.5 4.5H20" stroke="oklch(0.72 0.18 142)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4 12h3l2-6 2 12 2-8 1.5 4.5H20" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-bold leading-tight tracking-tight" style={{ color: "oklch(0.93 0.005 140)" }}>
+              <p className="text-[13px] font-bold leading-tight tracking-tight" style={{ color: "var(--text)" }}>
                 AutoClaim
               </p>
-              <p className="text-[10px] font-semibold tracking-wider" style={{ color: "oklch(0.72 0.18 142)" }}>
+              <p className="text-[10px] font-semibold tracking-wider" style={{ color: "var(--green)" }}>
                 AI / MAESTRO
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function Sidebar() {
         </div>
 
         {/* Divider */}
-        <div className="mx-4 h-px" style={{ background: "oklch(1.00 0.000 0 / 0.07)" }} />
+        <div className="mx-4 h-px" style={{ background: "var(--border)" }} />
 
         {/* Nav */}
         <div className="flex-1 px-2.5 py-3 space-y-px">
@@ -101,14 +101,12 @@ export default function Sidebar() {
               <Link key={href} href={href}
                 className="relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg group"
                 style={{
-                  background: active
-                    ? "oklch(0.72 0.18 142 / 0.10)"
-                    : "transparent",
+                  background: active ? "var(--green-dim)" : "transparent",
                   color: active
-                    ? "oklch(0.82 0.16 142)"
+                    ? "var(--green-bright)"
                     : isNew
-                    ? "oklch(0.72 0.18 142 / 0.75)"
-                    : "oklch(0.55 0.008 140)",
+                    ? "var(--green)"
+                    : "var(--text-2)",
                   fontWeight: active ? 600 : 400,
                   transition: "background 160ms cubic-bezier(0.25,1,0.5,1), color 130ms cubic-bezier(0.25,1,0.5,1)",
                 }}>
@@ -116,16 +114,16 @@ export default function Sidebar() {
                 {active && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3.5 rounded-r-full"
                     style={{
-                      background: "oklch(0.72 0.18 142)",
-                      boxShadow: "2px 0 8px oklch(0.72 0.18 142 / 0.50)",
+                      background: "var(--green)",
+                      boxShadow: "2px 0 8px var(--green-glow)",
                     }} />
                 )}
                 <span className="shrink-0" style={{
                   color: active
-                    ? "oklch(0.72 0.18 142)"
+                    ? "var(--green)"
                     : isNew
-                    ? "oklch(0.72 0.18 142 / 0.60)"
-                    : "oklch(0.38 0.006 140)",
+                    ? "oklch(0.70 0.17 155 / 0.65)"
+                    : "var(--text-3)",
                   transition: "color 130ms cubic-bezier(0.25,1,0.5,1)",
                 }}>
                   {icon}
@@ -154,18 +152,18 @@ export default function Sidebar() {
 
         {/* Bottom — AI status */}
         <div className="px-3 pb-5">
-          <div className="h-px mb-3" style={{ background: "oklch(1.00 0.000 0 / 0.07)" }} />
+          <div className="h-px mb-3" style={{ background: "var(--border)" }} />
           {/* System status chip */}
           <div className="rounded-lg px-3 py-2.5 flex items-center gap-2.5"
             style={{
-              background: "oklch(0.72 0.18 142 / 0.07)",
-              border: "1px solid oklch(0.72 0.18 142 / 0.20)",
+              background: "var(--green-dim)",
+              border: "1px solid var(--green-border)",
             }}>
             <div className="h-1.5 w-1.5 rounded-full shrink-0 animate-live"
-              style={{ background: "oklch(0.72 0.18 142)" }} />
+              style={{ background: "var(--green)" }} />
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold" style={{ color: "oklch(0.82 0.16 142)" }}>AI System Online</p>
-              <p className="text-[10px]" style={{ color: "oklch(0.72 0.18 142 / 0.55)" }}>Claude + Maestro active</p>
+              <p className="text-[11px] font-semibold" style={{ color: "var(--green-bright)" }}>AI System Online</p>
+              <p className="text-[10px]" style={{ color: "oklch(0.70 0.17 155 / 0.55)" }}>Claude + Maestro active</p>
             </div>
           </div>
         </div>
@@ -179,8 +177,8 @@ export default function Sidebar() {
             <Link key={href} href={href}
               className="relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-150"
               style={active
-                ? { color: "oklch(0.82 0.16 142)", background: "oklch(0.72 0.18 142 / 0.10)" }
-                : { color: "oklch(0.38 0.006 140)" }
+                ? { color: "var(--green-bright)", background: "var(--green-dim)" }
+                : { color: "var(--text-3)" }
               }>
               {icon}
               <span className="text-[9px] uppercase tracking-wide font-semibold">{label.split(" ")[0]}</span>

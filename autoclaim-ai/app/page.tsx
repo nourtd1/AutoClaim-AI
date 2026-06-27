@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { initDb, getAllClaims, getRecentStageEvents, getDb } from "@/lib/db";
-import type { ClaimStatus, DashboardStats } from "@/lib/types";
+import type { ClaimStatus, DashboardStats, DbCountRow, DbAvgRow, DbIdRow } from "@/lib/types";
 import LiveFeed from "./dashboard/LiveFeed";
 import TopBar from "@/components/TopBar";
 import KpiNumber from "@/components/ui/KpiNumber";
@@ -13,7 +13,6 @@ async function fetchStats(): Promise<DashboardStats> {
   const db = getDb();
   const s = new Date(); s.setHours(0, 0, 0, 0);
   const start = s.toISOString(), end = new Date().toISOString();
-  type CR = { cnt: number }; type AR = { avg_minutes: number | null };
 
   const [totalR, approvedR, rejectedR, escalatedR, pendingR, avgR] = await Promise.all([
     db.execute({ sql: `SELECT COUNT(*) as cnt FROM claims WHERE createdAt>=? AND createdAt<=? AND deletedAt IS NULL`, args: [start, end] }),
@@ -24,19 +23,19 @@ async function fetchStats(): Promise<DashboardStats> {
     db.execute({ sql: `SELECT AVG((julianday(resolvedAt)-julianday(createdAt))*1440) as avg_minutes FROM claims WHERE resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args: [start, end] }),
   ]);
 
-  const total     = Number((totalR.rows[0]     as unknown as CR).cnt);
-  const approved  = Number((approvedR.rows[0]  as unknown as CR).cnt);
-  const rejected  = Number((rejectedR.rows[0]  as unknown as CR).cnt);
-  const escalated = Number((escalatedR.rows[0] as unknown as CR).cnt);
-  const pending   = Number((pendingR.rows[0]   as unknown as CR).cnt);
-  const avgProcessingTime = Math.round(Number((avgR.rows[0] as unknown as AR).avg_minutes ?? 0));
+  const total     = Number((totalR.rows[0]     as unknown as DbCountRow).cnt);
+  const approved  = Number((approvedR.rows[0]  as unknown as DbCountRow).cnt);
+  const rejected  = Number((rejectedR.rows[0]  as unknown as DbCountRow).cnt);
+  const escalated = Number((escalatedR.rows[0] as unknown as DbCountRow).cnt);
+  const pending   = Number((pendingR.rows[0]   as unknown as DbCountRow).cnt);
+  const avgProcessingTime = Math.round(Number((avgR.rows[0] as unknown as DbAvgRow).avg_minutes ?? 0));
 
   const approvedIdsR = await db.execute({ sql: `SELECT id FROM claims WHERE status='APPROVED' AND resolvedAt>=? AND resolvedAt<=? AND deletedAt IS NULL`, args: [start, end] });
-  const approvedIds  = approvedIdsR.rows.map(r => (r as unknown as { id: string }).id);
+  const approvedIds  = approvedIdsR.rows.map(r => (r as unknown as DbIdRow).id);
   let autoApproved   = 0;
   if (approvedIds.length > 0) {
     const humanR = await db.execute({ sql: `SELECT COUNT(DISTINCT claimId) as cnt FROM stage_events WHERE actor='HUMAN' AND claimId IN (${approvedIds.map(() => "?").join(",")})`, args: approvedIds });
-    autoApproved = approvedIds.length - Number((humanR.rows[0] as unknown as CR).cnt);
+    autoApproved = approvedIds.length - Number((humanR.rows[0] as unknown as DbCountRow).cnt);
   }
   const autoApprovalRate = approved > 0 ? Math.round((autoApproved / approved) * 100) : 0;
   return { total, approved, rejected, escalated, pending, avgProcessingTime, autoApprovalRate };
@@ -67,14 +66,14 @@ function KpiCard({ label, value, sub, tooltip, icon, delay, accent, accentDim, a
           style={{ background: accentDim, border: `1px solid ${accentBorder}` }}>
           <span style={{ color: accent }}>{icon}</span>
         </div>
-        <p className="text-[11px] font-medium text-right leading-snug"
-          style={{ color: "oklch(0.42 0.007 140)" }}>{label}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-right leading-snug"
+          style={{ color: "var(--text-3)" }}>{label}</p>
       </div>
 
       {/* Value */}
       <div>
         <KpiNumber value={value} color={accent} />
-        {sub && <p className="text-[11px] mt-1.5 truncate" style={{ color: "oklch(0.35 0.005 140)" }}>{sub}</p>}
+        {sub && <p className="text-[11px] mt-1.5 truncate" style={{ color: "var(--text-4)" }}>{sub}</p>}
       </div>
     </div>
   );

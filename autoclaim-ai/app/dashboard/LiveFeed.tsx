@@ -51,7 +51,7 @@ export default function LiveFeed() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-[13px] font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>Live Feed</h2>
+          <h2 className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Live Feed</h2>
           <div className="flex items-center gap-1.5 rounded-full px-2 py-0.5"
             style={{
               background: isOnline ? "oklch(0.72 0.18 142 / 0.09)" : "oklch(0.38 0.005 140 / 0.10)",
@@ -78,7 +78,7 @@ export default function LiveFeed() {
             </span>
           </div>
         </div>
-        <span className="text-[10px] font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>↻ 5s</span>
+        <span className="text-[10px] font-mono-id" style={{ color: "var(--text-4)" }}>↻ 5s</span>
       </div>
 
       {/* Actor legend */}
@@ -92,50 +92,52 @@ export default function LiveFeed() {
         ))}
       </div>
 
-      {/* Events — hauteur contrainte pour éviter de dominer le layout */}
-      <ul ref={listRef} className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+      {/* Events — hauteur contrainte, scroll interne */}
+      <ul ref={listRef} className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
         {events.length === 0 && (
           <li className="py-8 text-center flex flex-col items-center gap-2.5"
-            style={{ color: "oklch(0.30 0.004 140)" }}>
+            style={{ color: "var(--text-4)" }}>
             <div className="flex gap-1.5">
-              <div className="dot-1 h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.30 0.004 140)" }} />
-              <div className="dot-2 h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.30 0.004 140)" }} />
-              <div className="dot-3 h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.30 0.004 140)" }} />
+              <div className="dot-1 h-1.5 w-1.5 rounded-full" style={{ background: "var(--text-4)" }} />
+              <div className="dot-2 h-1.5 w-1.5 rounded-full" style={{ background: "var(--text-4)" }} />
+              <div className="dot-3 h-1.5 w-1.5 rounded-full" style={{ background: "var(--text-4)" }} />
             </div>
             <span className="text-xs">Waiting for activity…</span>
           </li>
         )}
         {events.map((ev, i) => {
           const a = ACTOR[ev.actor];
-          const stageColor = STAGE_COLOR[ev.stage] ?? "oklch(0.38 0.005 140)";
+          const stageColor = STAGE_COLOR[ev.stage] ?? "var(--text-4)";
           return (
-            <li key={ev.id} className="flex items-start gap-2.5 text-xs animate-stagger"
-              style={{ "--i": i } as React.CSSProperties}>
-              <div className="mt-0.5 h-6 w-6 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
+            <li key={ev.id}
+              className="flex items-center gap-2.5 text-xs animate-stagger rounded-lg px-2 py-1.5 transition-colors"
+              style={{
+                "--i": i,
+                background: "transparent",
+              } as React.CSSProperties}>
+              <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold"
                 style={a
                   ? { background: a.bg, border: `1px solid ${a.border}`, color: a.color }
-                  : { background: "oklch(1.00 0.000 0 / 0.04)", border: "1px solid oklch(1.00 0.000 0 / 0.08)", color: "oklch(0.38 0.005 140)" }
+                  : { background: "var(--surface-3)", border: "1px solid var(--border)", color: "var(--text-4)" }
                 }>
                 {ev.actor === "AGENT" ? "✦" : ev.actor === "ROBOT" ? "◆" : "●"}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate leading-snug font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>
-                  {ev.claimantName}
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="h-1 w-1 rounded-full shrink-0" style={{ background: stageColor }} />
-                  <span className="text-[11px] font-medium" style={{ color: stageColor }}>
+                <p className="truncate leading-snug">
+                  <span className="font-semibold" style={{ color: "var(--text)" }}>{ev.claimantName}</span>
+                  <span className="mx-1" style={{ color: "var(--text-4)" }}>·</span>
+                  <span className="text-[11px]" style={{ color: stageColor }}>
                     {ev.stage.replace(/_/g, " ")}
                   </span>
-                </div>
+                </p>
                 {ev.notes && (
-                  <p className="truncate mt-0.5 text-[11px]" style={{ color: "oklch(0.35 0.005 140)" }}>
+                  <p className="truncate text-[10px]" style={{ color: "var(--text-4)" }}>
                     {ev.notes}
                   </p>
                 )}
               </div>
-              <time className="shrink-0 font-mono-id tabular-nums text-[10px] pt-0.5"
-                style={{ color: "oklch(0.30 0.004 140)" }}>
+              <time className="shrink-0 font-mono-id tabular-nums text-[10px]"
+                style={{ color: "var(--text-4)" }}>
                 {relTime(ev.timestamp)}
               </time>
             </li>
