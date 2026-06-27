@@ -1,5 +1,7 @@
 // ── Enumerations ──────────────────────────────────────────────────────────────
 
+export type ActorType = "AGENT" | "ROBOT" | "HUMAN";
+
 export type ClaimStatus =
   | "SUBMITTED"
   | "EXTRACTING"
@@ -132,6 +134,31 @@ export interface Reviewer {
   email: string;
   role: string;
   isAvailable: boolean;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  total: number;
+  approved: number;
+  rejected: number;
+  escalated: number;
+  pending: number;
+  avgProcessingTime: number;
+  autoApprovalRate: number;
+}
+
+// ── Live Feed event (subset of StageEvent with claimantName joined) ───────────
+
+export interface FeedEvent {
+  id: string;
+  claimId: string;
+  stage: ClaimStage;
+  status: ClaimStatus;
+  actor: ActorType;
+  notes: string | null;
+  timestamp: string;
+  claimantName: string;
 }
 
 // ── Document attachment (maps to `documents` table) ───────────────────────────

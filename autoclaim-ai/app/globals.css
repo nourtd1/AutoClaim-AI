@@ -9,18 +9,25 @@
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring:    cubic-bezier(0.34, 1.04, 0.64, 1);
 
-  /* ── Palette — tactical ops console ── */
-  --bg:        oklch(0.08 0.000 0);
-  --surface:   oklch(0.115 0.006 140);
-  --surface-2: oklch(0.155 0.005 140);
-  --surface-3: oklch(0.195 0.007 140);
+  /* ── Palette — enterprise SaaS (slate-950 family) ── */
+  --bg:        oklch(0.115 0.012 250);
+  --surface:   oklch(0.148 0.013 250);
+  --surface-2: oklch(0.182 0.013 250);
+  --surface-3: oklch(0.218 0.012 250);
 
-  /* ── Signal green — primary brand ── */
-  --green:        oklch(0.72 0.18 142);
-  --green-bright: oklch(0.82 0.16 142);
-  --green-dim:    oklch(0.72 0.18 142 / 0.13);
-  --green-border: oklch(0.72 0.18 142 / 0.28);
-  --green-glow:   oklch(0.72 0.18 142 / 0.22);
+  /* ── Brand green — primary action ── */
+  --green:        oklch(0.70 0.17 155);
+  --green-bright: oklch(0.80 0.15 155);
+  --green-dim:    oklch(0.70 0.17 155 / 0.12);
+  --green-border: oklch(0.70 0.17 155 / 0.30);
+  --green-glow:   oklch(0.70 0.17 155 / 0.20);
+
+  /* ── Azure — secondary accent (AI / data) ── */
+  --azure:        oklch(0.68 0.18 232);
+  --azure-bright: oklch(0.78 0.15 232);
+  --azure-dim:    oklch(0.68 0.18 232 / 0.12);
+  --azure-border: oklch(0.68 0.18 232 / 0.30);
+  --azure-glow:   oklch(0.68 0.18 232 / 0.20);
 
   /* ── Amber — warnings, human actions ── */
   --amber:        oklch(0.80 0.13 78);
@@ -28,23 +35,24 @@
   --amber-border: oklch(0.80 0.13 78 / 0.28);
 
   /* ── State colors ── */
-  --state-approved:   oklch(0.72 0.18 142);
+  --state-approved:   oklch(0.70 0.17 155);
   --state-rejected:   oklch(0.68 0.22 22);
   --state-escalated:  oklch(0.70 0.19 12);
   --state-pending:    oklch(0.80 0.13 78);
-  --state-extracting: oklch(0.70 0.17 230);
-  --state-submitted:  oklch(0.42 0.006 140);
+  --state-extracting: oklch(0.68 0.18 232);
+  --state-submitted:  oklch(0.44 0.009 250);
+  --state-validating: oklch(0.70 0.17 155);
 
   /* ── Text ── */
-  --text:   oklch(0.93 0.005 140);
-  --text-2: oklch(0.62 0.010 140);
-  --text-3: oklch(0.42 0.007 140);
-  --text-4: oklch(0.28 0.004 140);
+  --text:   oklch(0.93 0.008 250);
+  --text-2: oklch(0.65 0.012 250);
+  --text-3: oklch(0.44 0.009 250);
+  --text-4: oklch(0.30 0.006 250);
 
-  /* ── Borders — neutral structural ── */
-  --border:        oklch(1.00 0.000 0 / 0.07);
-  --border-mid:    oklch(1.00 0.000 0 / 0.12);
-  --border-strong: oklch(1.00 0.000 0 / 0.22);
+  /* ── Structural borders ── */
+  --border:        oklch(1.00 0.000 0 / 0.08);
+  --border-mid:    oklch(1.00 0.000 0 / 0.14);
+  --border-strong: oklch(1.00 0.000 0 / 0.24);
 }
 
 * { box-sizing: border-box; }
@@ -53,16 +61,14 @@ html { scroll-behavior: smooth; }
 body {
   background-color: var(--bg);
   background-image:
-    repeating-linear-gradient(
-      0deg,
-      oklch(1.00 0.000 0 / 0.016) 0px,
-      oklch(1.00 0.000 0 / 0.016) 1px,
-      transparent 1px,
-      transparent 4px
+    radial-gradient(
+      ellipse 70% 40% at 60% -5%,
+      oklch(0.68 0.18 232 / 0.040) 0%,
+      transparent 100%
     ),
     radial-gradient(
-      ellipse 90% 45% at 50% -10%,
-      oklch(0.72 0.18 142 / 0.055) 0%,
+      ellipse 50% 30% at 20% 80%,
+      oklch(0.70 0.17 155 / 0.025) 0%,
       transparent 100%
     );
   background-attachment: fixed;
@@ -77,83 +83,95 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
 
-::selection { background: oklch(0.72 0.18 142 / 0.25); color: var(--text); }
+::selection { background: oklch(0.68 0.18 232 / 0.28); color: var(--text); }
 
 @layer components {
   /* ── Cards ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.22);
   }
 
   .card-glow {
     background: var(--surface);
     border: 1px solid var(--border-mid);
-    border-radius: 10px;
-    box-shadow: 0 2px 20px oklch(0 0 0 / 0.38);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 3px oklch(0 0 0 / 0.25),
+      0 4px 20px oklch(0 0 0 / 0.22);
     transition:
       border-color 220ms var(--ease-out-quart),
       box-shadow 220ms var(--ease-out-quart);
   }
   .card-glow:hover {
-    border-color: var(--green-border);
+    border-color: var(--azure-border);
     box-shadow:
-      0 4px 28px oklch(0 0 0 / 0.50),
-      0 0 0 1px oklch(0.72 0.18 142 / 0.06) inset;
+      0 2px 6px oklch(0 0 0 / 0.30),
+      0 8px 32px oklch(0 0 0 / 0.28),
+      0 0 0 1px oklch(0.68 0.18 232 / 0.06) inset;
   }
 
   /* ── KPI card ── */
   .kpi-card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--border-mid);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px oklch(0 0 0 / 0.20);
     transition:
       border-color 200ms var(--ease-out-quart),
-      background 200ms var(--ease-out-quart);
+      background 200ms var(--ease-out-quart),
+      box-shadow 200ms var(--ease-out-quart);
   }
   .kpi-card:hover {
     background: var(--surface-2);
-    border-color: var(--border-mid);
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 12px oklch(0 0 0 / 0.30);
   }
 
   /* ── Claim card ── */
   .claim-card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 1px 12px oklch(0 0 0 / 0.28);
+    border: 1px solid var(--border-mid);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 3px oklch(0 0 0 / 0.22),
+      0 2px 12px oklch(0 0 0 / 0.16);
     transition:
       border-color 180ms var(--ease-out-quart),
       background 180ms var(--ease-out-quart),
-      transform 180ms var(--ease-out-quart);
+      transform 180ms var(--ease-out-quart),
+      box-shadow 180ms var(--ease-out-quart);
     cursor: pointer;
   }
   .claim-card:hover {
     border-color: var(--green-border);
     background: var(--surface-2);
     transform: translateY(-1px);
-    box-shadow: 0 4px 20px oklch(0 0 0 / 0.40);
+    box-shadow:
+      0 2px 6px oklch(0 0 0 / 0.28),
+      0 6px 24px oklch(0 0 0 / 0.22);
   }
   .claim-card:active { transform: translateY(0); transition-duration: 80ms; }
 
-  /* ── Primary button — solid signal green ── */
+  /* ── Primary button — brand green ── */
   .btn-primary {
     background: var(--green);
     color: oklch(0.09 0.000 0);
     font-weight: 700;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
     transition:
       background 160ms var(--ease-out-quart),
       box-shadow 160ms var(--ease-out-quart),
       transform 130ms var(--ease-out-quart);
-    box-shadow: 0 1px 10px var(--green-glow);
+    box-shadow: 0 1px 10px var(--green-glow), 0 0 0 1px oklch(0.70 0.17 155 / 0.15) inset;
     letter-spacing: -0.01em;
   }
   .btn-primary:hover {
     background: var(--green-bright);
-    box-shadow: 0 3px 16px oklch(0.72 0.18 142 / 0.40);
+    box-shadow: 0 3px 18px oklch(0.70 0.17 155 / 0.42), 0 0 0 1px oklch(0.70 0.17 155 / 0.20) inset;
     transform: translateY(-1px);
   }
   .btn-primary:active {
@@ -225,18 +243,19 @@ body {
 
   /* ── Sidebar ── */
   .sidebar-bg {
-    background: oklch(0.065 0.000 0 / 0.97);
+    background: oklch(0.098 0.011 250 / 0.97);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-right: 1px solid var(--border-mid);
+    box-shadow: 1px 0 0 0 oklch(1.00 0 0 / 0.04);
   }
 
   /* ── Topbar ── */
   .topbar-bg {
-    background: oklch(0.08 0.000 0 / 0.90);
+    background: oklch(0.115 0.012 250 / 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-mid);
   }
 }
 
@@ -300,16 +319,16 @@ body {
 .animate-critical { animation: critical-blink 0.85s steps(1) infinite; }
 
 @keyframes live-dot {
-  0%   { box-shadow: 0 0 0 0 oklch(0.72 0.18 142 / 0.70); }
-  70%  { box-shadow: 0 0 0 5px oklch(0.72 0.18 142 / 0.00); }
-  100% { box-shadow: 0 0 0 0 oklch(0.72 0.18 142 / 0.00); }
+  0%   { box-shadow: 0 0 0 0 oklch(0.70 0.17 155 / 0.70); }
+  70%  { box-shadow: 0 0 0 5px oklch(0.70 0.17 155 / 0.00); }
+  100% { box-shadow: 0 0 0 0 oklch(0.70 0.17 155 / 0.00); }
 }
 .animate-live { animation: live-dot 1.8s ease-out infinite; }
 
 @keyframes live-dot-emerald {
-  0%   { box-shadow: 0 0 0 0 oklch(0.72 0.18 142 / 0.70); }
-  70%  { box-shadow: 0 0 0 5px oklch(0.72 0.18 142 / 0.00); }
-  100% { box-shadow: 0 0 0 0 oklch(0.72 0.18 142 / 0.00); }
+  0%   { box-shadow: 0 0 0 0 oklch(0.70 0.17 155 / 0.70); }
+  70%  { box-shadow: 0 0 0 5px oklch(0.70 0.17 155 / 0.00); }
+  100% { box-shadow: 0 0 0 0 oklch(0.70 0.17 155 / 0.00); }
 }
 .animate-live-emerald { animation: live-dot-emerald 1.8s ease-out infinite; }
 
@@ -391,12 +410,13 @@ body {
 
   /* Signal dots */
   .dot-green  { background: var(--green); }
+  .dot-azure  { background: var(--azure); }
   .dot-amber  { background: var(--amber); }
   .dot-red    { background: var(--state-rejected); }
   .dot-muted  { background: var(--state-submitted); }
 
   /* Backward compat aliases */
-  .dot-indigo  { background: var(--green); }
+  .dot-indigo  { background: var(--azure); }
   .dot-emerald { background: var(--state-approved); }
   .dot-orange  { background: var(--amber); }
   .dot-rose    { background: var(--state-escalated); }

@@ -9,35 +9,54 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg:      "oklch(0.08 0.000 0)",
-        surface: "oklch(0.115 0.006 140)",
-        "surface-2": "oklch(0.155 0.005 140)",
-        "surface-3": "oklch(0.195 0.007 140)",
-        text:    "oklch(0.93 0.005 140)",
-        "text-2": "oklch(0.62 0.010 140)",
-        "text-3": "oklch(0.42 0.007 140)",
-        "text-4": "oklch(0.28 0.004 140)",
+        /* ── Backgrounds — slate-950 family (softer than pure black) ── */
+        bg:          "oklch(0.115 0.012 250)",
+        surface:     "oklch(0.148 0.013 250)",
+        "surface-2": "oklch(0.182 0.013 250)",
+        "surface-3": "oklch(0.218 0.012 250)",
+
+        /* ── Text ── */
+        text:    "oklch(0.93 0.008 250)",
+        "text-2": "oklch(0.65 0.012 250)",
+        "text-3": "oklch(0.44 0.009 250)",
+        "text-4": "oklch(0.30 0.006 250)",
+
+        /* ── Brand green — primary accent, slightly cooler ── */
         green: {
-          DEFAULT: "oklch(0.72 0.18 142)",
-          bright:  "oklch(0.82 0.16 142)",
-          dim:     "oklch(0.72 0.18 142 / 0.13)",
-          border:  "oklch(0.72 0.18 142 / 0.28)",
-          glow:    "oklch(0.72 0.18 142 / 0.22)",
+          DEFAULT: "oklch(0.70 0.17 155)",
+          bright:  "oklch(0.80 0.15 155)",
+          dim:     "oklch(0.70 0.17 155 / 0.12)",
+          border:  "oklch(0.70 0.17 155 / 0.30)",
+          glow:    "oklch(0.70 0.17 155 / 0.20)",
         },
+
+        /* ── Azure — secondary accent (AI/data emphasis) ── */
+        azure: {
+          DEFAULT: "oklch(0.68 0.18 232)",
+          bright:  "oklch(0.78 0.15 232)",
+          dim:     "oklch(0.68 0.18 232 / 0.12)",
+          border:  "oklch(0.68 0.18 232 / 0.30)",
+          glow:    "oklch(0.68 0.18 232 / 0.20)",
+        },
+
+        /* ── Amber — warnings, human actions ── */
         amber: {
           DEFAULT: "oklch(0.80 0.13 78)",
           dim:     "oklch(0.80 0.13 78 / 0.13)",
           border:  "oklch(0.80 0.13 78 / 0.28)",
         },
-        /* backward compat */
-        indigo:  { DEFAULT: "oklch(0.72 0.18 142)", 400: "oklch(0.82 0.16 142)", 500: "oklch(0.72 0.18 142)" },
-        emerald: { DEFAULT: "oklch(0.72 0.18 142)", 400: "oklch(0.82 0.16 142)", 500: "oklch(0.72 0.18 142)" },
+
+        /* ── Backward compat aliases ── */
+        indigo:  { DEFAULT: "oklch(0.68 0.18 232)", 400: "oklch(0.78 0.15 232)", 500: "oklch(0.68 0.18 232)" },
+        emerald: { DEFAULT: "oklch(0.70 0.17 155)", 400: "oklch(0.80 0.15 155)", 500: "oklch(0.70 0.17 155)" },
         orange:  { DEFAULT: "oklch(0.80 0.13 78)",  400: "oklch(0.88 0.11 78)",  500: "oklch(0.80 0.13 78)" },
         rose:    { DEFAULT: "oklch(0.68 0.22 22)",  400: "oklch(0.76 0.18 22)",  500: "oklch(0.68 0.22 22)" },
-        violet:  { DEFAULT: "oklch(0.72 0.18 142)", 400: "oklch(0.82 0.16 142)" },
-        border:       "oklch(1.00 0.000 0 / 0.07)",
-        "border-mid": "oklch(1.00 0.000 0 / 0.12)",
-        "border-strong": "oklch(1.00 0.000 0 / 0.22)",
+        violet:  { DEFAULT: "oklch(0.68 0.18 232)", 400: "oklch(0.78 0.15 232)" },
+
+        /* ── Structural borders ── */
+        border:          "oklch(1.00 0.000 0 / 0.08)",
+        "border-mid":    "oklch(1.00 0.000 0 / 0.14)",
+        "border-strong": "oklch(1.00 0.000 0 / 0.24)",
       },
       fontFamily: {
         sans:  ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -49,16 +68,18 @@ const config: Config = {
         xl4: "1.25rem",
       },
       boxShadow: {
-        card:      "0 2px 16px oklch(0 0 0 / 0.38)",
-        "card-md": "0 4px 28px oklch(0 0 0 / 0.50)",
-        "card-lg": "0 8px 48px oklch(0 0 0 / 0.60)",
-        green:     "0 2px 12px oklch(0.72 0.18 142 / 0.35)",
-        "green-lg":"0 4px 24px oklch(0.72 0.18 142 / 0.40)",
-        amber:     "0 2px 12px oklch(0.80 0.13 78 / 0.30)",
+        card:       "0 1px 4px oklch(0 0 0 / 0.30), 0 2px 16px oklch(0 0 0 / 0.28)",
+        "card-md":  "0 2px 8px oklch(0 0 0 / 0.40), 0 4px 28px oklch(0 0 0 / 0.36)",
+        "card-lg":  "0 4px 16px oklch(0 0 0 / 0.50), 0 8px 48px oklch(0 0 0 / 0.44)",
+        green:      "0 2px 12px oklch(0.70 0.17 155 / 0.32)",
+        "green-lg": "0 4px 24px oklch(0.70 0.17 155 / 0.38)",
+        azure:      "0 2px 12px oklch(0.68 0.18 232 / 0.32)",
+        "azure-lg": "0 4px 24px oklch(0.68 0.18 232 / 0.38)",
+        amber:      "0 2px 12px oklch(0.80 0.13 78 / 0.30)",
         /* backward compat */
-        indigo:    "0 2px 12px oklch(0.72 0.18 142 / 0.35)",
-        "indigo-lg":"0 4px 24px oklch(0.72 0.18 142 / 0.40)",
-        emerald:   "0 2px 12px oklch(0.72 0.18 142 / 0.28)",
+        indigo:     "0 2px 12px oklch(0.68 0.18 232 / 0.32)",
+        "indigo-lg":"0 4px 24px oklch(0.68 0.18 232 / 0.38)",
+        emerald:    "0 2px 12px oklch(0.70 0.17 155 / 0.28)",
       },
       animation: {
         "status-pulse": "status-pulse 1.8s ease-in-out infinite",
@@ -75,8 +96,8 @@ const config: Config = {
         "status-pulse":     { "0%,100%": { opacity:"1" }, "50%": { opacity:"0.30" } },
         "critical-blink":   { "0%,100%": { opacity:"1" }, "50%": { opacity:"0.18" } },
         "fade-up":          { from:{ opacity:"0", transform:"translateY(8px)" }, to:{ opacity:"1", transform:"translateY(0)" } },
-        "live-dot":         { "0%":{ boxShadow:"0 0 0 0 oklch(0.72 0.18 142 / 0.70)" }, "70%":{ boxShadow:"0 0 0 5px oklch(0.72 0.18 142 / 0.00)" }, "100%":{ boxShadow:"0 0 0 0 oklch(0.72 0.18 142 / 0.00)" } },
-        "live-dot-emerald": { "0%":{ boxShadow:"0 0 0 0 oklch(0.72 0.18 142 / 0.70)" }, "70%":{ boxShadow:"0 0 0 5px oklch(0.72 0.18 142 / 0.00)" }, "100%":{ boxShadow:"0 0 0 0 oklch(0.72 0.18 142 / 0.00)" } },
+        "live-dot":         { "0%":{ boxShadow:"0 0 0 0 oklch(0.70 0.17 155 / 0.70)" }, "70%":{ boxShadow:"0 0 0 5px oklch(0.70 0.17 155 / 0.00)" }, "100%":{ boxShadow:"0 0 0 0 oklch(0.70 0.17 155 / 0.00)" } },
+        "live-dot-emerald": { "0%":{ boxShadow:"0 0 0 0 oklch(0.70 0.17 155 / 0.70)" }, "70%":{ boxShadow:"0 0 0 5px oklch(0.70 0.17 155 / 0.00)" }, "100%":{ boxShadow:"0 0 0 0 oklch(0.70 0.17 155 / 0.00)" } },
         "live-dot-amber":   { "0%":{ boxShadow:"0 0 0 0 oklch(0.80 0.13 78 / 0.65)" }, "70%":{ boxShadow:"0 0 0 5px oklch(0.80 0.13 78 / 0.00)" }, "100%":{ boxShadow:"0 0 0 0 oklch(0.80 0.13 78 / 0.00)" } },
         shimmer:            { "0%":{ backgroundPosition:"-200% 0" }, "100%":{ backgroundPosition:"200% 0" } },
         "glow-pulse":       { "0%,100%": { opacity:"0.55" }, "50%": { opacity:"1" } },

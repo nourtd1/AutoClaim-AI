@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-
-interface FeedEvent { id: string; stage: string; status: string; actor: string; notes: string | null; timestamp: string; claimantName: string; }
+import type { FeedEvent } from "@/lib/types";
 
 const ACTOR: Record<string, { label: string; bg: string; border: string; color: string; symbol: string }> = {
   AGENT: { label: "AI Agent", symbol: "✦", bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.25)", color: "oklch(0.82 0.16 142)" },
@@ -93,8 +92,8 @@ export default function LiveFeed() {
         ))}
       </div>
 
-      {/* Events */}
-      <ul ref={listRef} className="space-y-3 flex-1 overflow-y-auto pr-1">
+      {/* Events — hauteur contrainte pour éviter de dominer le layout */}
+      <ul ref={listRef} className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
         {events.length === 0 && (
           <li className="py-8 text-center flex flex-col items-center gap-2.5"
             style={{ color: "oklch(0.30 0.004 140)" }}>

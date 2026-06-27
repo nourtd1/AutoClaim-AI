@@ -1,17 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { initDb, getAllClaims, getRecentStageEvents, getDb } from "@/lib/db";
-import type { ClaimStatus } from "@/lib/types";
+import type { ClaimStatus, DashboardStats } from "@/lib/types";
 import LiveFeed from "./dashboard/LiveFeed";
 import TopBar from "@/components/TopBar";
 import KpiNumber from "@/components/ui/KpiNumber";
 
 export const metadata: Metadata = { title: "Dashboard" };
-
-interface DashboardStats {
-  total: number; approved: number; rejected: number; escalated: number; pending: number;
-  avgProcessingTime: number; autoApprovalRate: number;
-}
 
 async function fetchStats(): Promise<DashboardStats> {
   await initDb();
@@ -88,18 +83,18 @@ function KpiCard({ label, value, sub, tooltip, icon, delay, accent, accentDim, a
 // ── Status config ─────────────────────────────────────────────────────────────
 
 const STATUS_BAR: Record<string, string> = {
-  SUBMITTED:      "oklch(0.38 0.005 140)",
-  EXTRACTING:     "oklch(0.70 0.17 230)",
-  VALIDATING:     "oklch(0.72 0.18 142)",
+  SUBMITTED:      "oklch(0.44 0.009 250)",
+  EXTRACTING:     "oklch(0.68 0.18 232)",
+  VALIDATING:     "oklch(0.70 0.17 155)",
   PENDING_REVIEW: "oklch(0.80 0.13 78)",
-  APPROVED:       "oklch(0.72 0.18 142)",
+  APPROVED:       "oklch(0.70 0.17 155)",
   REJECTED:       "oklch(0.68 0.22 22)",
   ESCALATED:      "oklch(0.70 0.19 12)",
 };
 
 const ACTOR_META: Record<string, { symbol: string; bg: string; border: string; color: string }> = {
-  AGENT: { symbol: "✦", bg: "oklch(0.72 0.18 142 / 0.11)", border: "oklch(0.72 0.18 142 / 0.25)", color: "oklch(0.82 0.16 142)" },
-  ROBOT: { symbol: "◆", bg: "oklch(0.65 0.15 195 / 0.11)", border: "oklch(0.65 0.15 195 / 0.25)", color: "oklch(0.75 0.12 195)" },
+  AGENT: { symbol: "✦", bg: "oklch(0.70 0.17 155 / 0.11)", border: "oklch(0.70 0.17 155 / 0.25)", color: "oklch(0.80 0.15 155)" },
+  ROBOT: { symbol: "◆", bg: "oklch(0.68 0.18 232 / 0.11)", border: "oklch(0.68 0.18 232 / 0.25)", color: "oklch(0.78 0.15 232)" },
   HUMAN: { symbol: "●", bg: "oklch(0.80 0.13 78 / 0.11)",  border: "oklch(0.80 0.13 78 / 0.25)",  color: "oklch(0.88 0.11 78)" },
 };
 
@@ -132,12 +127,12 @@ export default async function DashboardPage() {
     {
       label: "Claims Today", value: stats.total, sub: "submitted since midnight",
       icon: <IcoDoc />, delay: "0ms", tooltip: "Claims today",
-      accent: "oklch(0.72 0.18 142)", accentDim: "oklch(0.72 0.18 142 / 0.12)", accentBorder: "oklch(0.72 0.18 142 / 0.25)",
+      accent: "oklch(0.70 0.17 155)", accentDim: "oklch(0.70 0.17 155 / 0.12)", accentBorder: "oklch(0.70 0.17 155 / 0.25)",
     },
     {
       label: "AI Resolved", value: `${stats.autoApprovalRate}%`, sub: `${stats.approved} approved · ${stats.rejected} rejected`,
       icon: <IcoBot />, delay: "55ms", tooltip: "Auto-resolved by AI",
-      accent: "oklch(0.72 0.18 142)", accentDim: "oklch(0.72 0.18 142 / 0.12)", accentBorder: "oklch(0.72 0.18 142 / 0.25)",
+      accent: "oklch(0.68 0.18 232)", accentDim: "oklch(0.68 0.18 232 / 0.12)", accentBorder: "oklch(0.68 0.18 232 / 0.25)",
     },
     {
       label: "Pending Review", value: stats.pending, sub: "awaiting human decision",
@@ -171,25 +166,25 @@ export default async function DashboardPage() {
           <section className="lg:col-span-2 card-glow rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <h2 className="text-[13px] font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>Recent Activity</h2>
-                <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "oklch(0.72 0.18 142)" }} />
+                <h2 className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Recent Activity</h2>
+                <div className="h-1.5 w-1.5 rounded-full animate-live" style={{ background: "var(--green)" }} />
               </div>
               <Link href="/claims"
                 className="text-[11px] font-medium transition-opacity hover:opacity-70"
-                style={{ color: "oklch(0.72 0.18 142)" }}>
+                style={{ color: "var(--azure)" }}>
                 View all →
               </Link>
             </div>
             <ol className="space-y-4">
               {recentEvents.length === 0 && (
-                <li className="text-xs py-6 text-center" style={{ color: "oklch(0.28 0.004 140)" }}>No activity yet</li>
+                <li className="text-xs py-6 text-center" style={{ color: "var(--text-4)" }}>No activity yet</li>
               )}
               {recentEvents.map((ev, i) => {
                 const actor = ACTOR_META[ev.actor] ?? {
                   symbol: "·",
                   bg: "oklch(1.00 0.000 0 / 0.04)",
                   border: "oklch(1.00 0.000 0 / 0.08)",
-                  color: "oklch(0.38 0.005 140)",
+                  color: "var(--text-3)",
                 };
                 return (
                   <li key={ev.id} className="flex items-start gap-3 text-xs animate-fade-up" style={{ animationDelay: `${i * 35}ms` }}>
@@ -198,19 +193,19 @@ export default async function DashboardPage() {
                       {actor.symbol}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate leading-snug" style={{ color: "oklch(0.93 0.005 140)" }}>
+                      <p className="truncate leading-snug" style={{ color: "var(--text)" }}>
                         <span className="font-semibold">{ev.claimantName}</span>
-                        <span className="mx-1" style={{ color: "oklch(0.28 0.004 140)" }}>·</span>
-                        <span style={{ color: "oklch(0.55 0.008 140)" }}>{ev.stage.replace(/_/g, " ")}</span>
+                        <span className="mx-1" style={{ color: "var(--text-4)" }}>·</span>
+                        <span style={{ color: "var(--text-2)" }}>{ev.stage.replace(/_/g, " ")}</span>
                       </p>
                       {ev.notes && (
-                        <p className="truncate mt-0.5 text-[11px]" style={{ color: "oklch(0.38 0.005 140)" }}>
+                        <p className="truncate mt-0.5 text-[11px]" style={{ color: "var(--text-3)" }}>
                           {ev.notes}
                         </p>
                       )}
                     </div>
                     <time className="shrink-0 font-mono-id tabular-nums text-[10px] pt-0.5"
-                      style={{ color: "oklch(0.30 0.004 140)" }}
+                      style={{ color: "var(--text-4)" }}
                       suppressHydrationWarning>
                       {relativeTime(ev.timestamp)}
                     </time>
@@ -232,8 +227,8 @@ export default async function DashboardPage() {
           {/* Claims by Status */}
           <section className="lg:col-span-2 card-glow rounded-xl p-5">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[13px] font-semibold" style={{ color: "oklch(0.93 0.005 140)" }}>Claims by Status</h2>
-              <span className="text-[11px] font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>
+              <h2 className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Claims by Status</h2>
+              <span className="text-[11px] font-mono-id" style={{ color: "var(--text-4)" }}>
                 {totalClaims} total
               </span>
             </div>
@@ -246,18 +241,18 @@ export default async function DashboardPage() {
                 return (
                   <li key={st} className="animate-stagger" style={{ "--i": idx } as React.CSSProperties}>
                     <div className="flex items-center justify-between text-[11px] mb-1.5">
-                      <span className="font-medium" style={{ color: "oklch(0.55 0.008 140)" }}>
+                      <span className="font-medium" style={{ color: "var(--text-2)" }}>
                         {st.replace(/_/g, " ")}
                       </span>
                       <div className="flex items-center gap-2.5">
-                        <span className="font-mono-id" style={{ color: "oklch(0.30 0.004 140)" }}>{pct}%</span>
+                        <span className="font-mono-id" style={{ color: "var(--text-4)" }}>{pct}%</span>
                         <span className="font-mono-id font-bold tabular-nums w-6 text-right"
-                          style={{ color: count > 0 ? color : "oklch(0.30 0.004 140)" }}>
+                          style={{ color: count > 0 ? color : "var(--text-4)" }}>
                           {count}
                         </span>
                       </div>
                     </div>
-                    <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "oklch(1.00 0.000 0 / 0.09)" }}>
+                    <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "var(--border-mid)" }}>
                       <div className="h-full rounded-full animate-bar"
                         style={{
                           width: `${barPct}%`,
@@ -273,52 +268,52 @@ export default async function DashboardPage() {
 
           {/* All-time stats */}
           <section className="card-glow rounded-xl p-5 flex flex-col">
-            <h2 className="text-[13px] font-semibold mb-4" style={{ color: "oklch(0.93 0.005 140)" }}>All-Time</h2>
+            <h2 className="text-[13px] font-semibold mb-4" style={{ color: "var(--text)" }}>All-Time</h2>
             <div className="space-y-3 flex-1">
               {/* AI Resolved */}
-              <div className="p-4 rounded-lg"
+              <div className="p-4 rounded-xl"
                 style={{
-                  background: "oklch(0.72 0.18 142 / 0.07)",
-                  border: "1px solid oklch(0.72 0.18 142 / 0.20)",
+                  background: "oklch(0.68 0.18 232 / 0.08)",
+                  border: "1px solid oklch(0.68 0.18 232 / 0.22)",
                 }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.72 0.18 142)" }} />
-                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "oklch(0.72 0.18 142 / 0.70)" }}>
+                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.68 0.18 232)" }} />
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "oklch(0.68 0.18 232 / 0.75)" }}>
                     AI Resolved
                   </p>
                 </div>
                 <p className="text-3xl font-bold font-mono-id leading-none tabular-nums"
-                  style={{ color: "oklch(0.82 0.16 142)" }}>
+                  style={{ color: "oklch(0.78 0.15 232)" }}>
                   {autoResolvedAll}
                 </p>
-                <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.72 0.18 142 / 0.50)" }}>
+                <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.68 0.18 232 / 0.55)" }}>
                   claims processed by AI
                 </p>
               </div>
               {/* Total claims */}
-              <div className="p-4 rounded-lg"
+              <div className="p-4 rounded-xl"
                 style={{
-                  background: "oklch(1.00 0.000 0 / 0.03)",
-                  border: "1px solid oklch(1.00 0.000 0 / 0.09)",
+                  background: "oklch(1.00 0.000 0 / 0.04)",
+                  border: "1px solid var(--border-mid)",
                 }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "oklch(0.42 0.006 140)" }} />
-                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "oklch(0.42 0.006 140)" }}>
+                  <div className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--text-3)" }} />
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text-3)" }}>
                     Total Claims
                   </p>
                 </div>
                 <p className="text-3xl font-bold font-mono-id leading-none tabular-nums"
-                  style={{ color: "oklch(0.62 0.010 140)" }}>
+                  style={{ color: "var(--text-2)" }}>
                   {totalClaims}
                 </p>
-                <p className="text-[11px] mt-1.5" style={{ color: "oklch(0.35 0.005 140)" }}>
+                <p className="text-[11px] mt-1.5" style={{ color: "var(--text-4)" }}>
                   ever submitted
                 </p>
               </div>
             </div>
             <Link href="/claims"
               className="mt-4 text-[11px] font-medium transition-opacity hover:opacity-70"
-              style={{ color: "oklch(0.72 0.18 142)" }}>
+              style={{ color: "var(--azure)" }}>
               Browse all claims →
             </Link>
           </section>

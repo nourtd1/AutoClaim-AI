@@ -20,7 +20,10 @@ function fmtDate(iso: string) {
 }
 
 const AMOUNT_COLOR: Record<string, string> = {
-  APPROVED: "#34D399", REJECTED: "#F87171", ESCALATED: "#FB7185", DEFAULT: "#818CF8",
+  APPROVED:  "oklch(0.70 0.17 155)",
+  REJECTED:  "oklch(0.68 0.22 22)",
+  ESCALATED: "oklch(0.70 0.19 12)",
+  DEFAULT:   "oklch(0.68 0.18 232)",
 };
 
 interface Props {
@@ -116,11 +119,11 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
       </div>
 
       {/* Count line */}
-      <p className="text-[11px]" style={{ color: "#4A5568" }}>
-        <span className="font-semibold" style={{ color: "#E8EBF4" }}>{filtered.length}</span>{" "}
+      <p className="text-[11px]" style={{ color: "var(--text-3)" }}>
+        <span className="font-semibold" style={{ color: "var(--text)" }}>{filtered.length}</span>{" "}
         claim{filtered.length !== 1 ? "s" : ""}
         {(search || statusFilter || priorityFilter || sourceFilter) && (
-          <span style={{ color: "#4A5568" }}> · filtered</span>
+          <span style={{ color: "var(--text-3)" }}> · filtered</span>
         )}
       </p>
 
@@ -128,10 +131,10 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
       <div className="hidden md:block card-glow rounded-xl2 overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+            <tr style={{ borderBottom: "1px solid var(--border-mid)", background: "oklch(1.00 0.000 0 / 0.025)" }}>
               {["ID", "Claimant", "Type", "Amount", "Status", "Priority", "Stage", "Created"].map((h, i) => (
                 <th key={h} className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-wider ${i >= 3 && i <= 3 ? "text-right" : "text-left"}`}
-                  style={{ color: "#3A4155" }}>{h}</th>
+                  style={{ color: "var(--text-4)" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -139,7 +142,7 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
             {pageClaims.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-12 text-center">
-                  <div className="flex flex-col items-center gap-2" style={{ color: "#3A4155" }}>
+                  <div className="flex flex-col items-center gap-2" style={{ color: "var(--text-4)" }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     <span>No claims match your filters</span>
                   </div>
@@ -152,29 +155,29 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
                 <tr key={c.id}
                   onClick={() => window.location.href = `/claims/${c.id}`}
                   className="cursor-pointer tr-hover animate-stagger"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", "--i": i } as React.CSSProperties}>
-                  <td className="px-4 py-3">
+                  style={{ borderBottom: "1px solid var(--border)", "--i": i } as React.CSSProperties}>
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono-id tabular-nums" style={{ color: "#4A5568" }}>{c.id.slice(0, 8)}…</span>
+                      <span className="font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{c.id.slice(0, 8)}…</span>
                       <button type="button" onClick={(e) => { e.stopPropagation(); copyId(c.id); }} title="Copy full ID"
                         className="transition-colors"
-                        style={{ color: copied === c.id ? "#6366F1" : "rgba(74,85,104,0.5)" }}>
+                        style={{ color: copied === c.id ? "var(--azure)" : "oklch(1.00 0.000 0 / 0.20)" }}>
                         {copied === c.id
                           ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                           : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
                       </button>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold" style={{ color: "#E8EBF4" }}>{c.claimantName}</p>
-                    <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "#4A5568" }}>{c.policyNumber}</p>
+                  <td className="px-4 py-3.5">
+                    <p className="font-semibold" style={{ color: "var(--text)" }}>{c.claimantName}</p>
+                    <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "var(--text-3)" }}>{c.policyNumber}</p>
                   </td>
-                  <td className="px-4 py-3" style={{ color: "#8B95B0" }}>{c.claimType.replace(/_/g, " ")}</td>
-                  <td className="px-4 py-3 text-right font-mono-id font-bold tabular-nums" style={{ color: amtColor }}>{fmtAmount(c.claimAmount, c.currency)}</td>
-                  <td className="px-4 py-3"><StatusBadge status={c.status} size="sm" /></td>
-                  <td className="px-4 py-3"><PriorityBadge priority={c.priority} size="sm" /></td>
-                  <td className="px-4 py-3" style={{ color: "#8B95B0" }}>{c.stage.replace(/_/g, " ")}</td>
-                  <td className="px-4 py-3 text-right font-mono-id tabular-nums" style={{ color: "#4A5568" }}>{fmtDate(c.createdAt)}</td>
+                  <td className="px-4 py-3.5" style={{ color: "var(--text-2)" }}>{c.claimType.replace(/_/g, " ")}</td>
+                  <td className="px-4 py-3.5 text-right font-mono-id font-bold tabular-nums" style={{ color: amtColor }}>{fmtAmount(c.claimAmount, c.currency)}</td>
+                  <td className="px-4 py-3.5"><StatusBadge status={c.status} size="sm" /></td>
+                  <td className="px-4 py-3.5"><PriorityBadge priority={c.priority} size="sm" /></td>
+                  <td className="px-4 py-3.5" style={{ color: "var(--text-2)" }}>{c.stage.replace(/_/g, " ")}</td>
+                  <td className="px-4 py-3.5 text-right font-mono-id tabular-nums" style={{ color: "var(--text-3)" }}>{fmtDate(c.createdAt)}</td>
                 </tr>
               );
             })}
@@ -195,8 +198,8 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
               style={{ "--i": i } as React.CSSProperties}>
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: "#E8EBF4" }}>{c.claimantName}</p>
-                  <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "#4A5568" }}>{c.policyNumber}</p>
+                  <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>{c.claimantName}</p>
+                  <p className="font-mono-id text-[10px] mt-0.5" style={{ color: "var(--text-3)" }}>{c.policyNumber}</p>
                 </div>
                 <StatusBadge status={c.status} size="sm" />
               </div>
@@ -217,8 +220,8 @@ export default function ClaimsClient({ initialClaims, initialStatus = "" }: Prop
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
             Prev
           </button>
-          <span className="text-xs font-mono-id" style={{ color: "#4A5568" }}>
-            <span style={{ color: "#E8EBF4" }}>{page}</span> / {totalPages}
+          <span className="text-xs font-mono-id" style={{ color: "var(--text-3)" }}>
+            <span style={{ color: "var(--text)" }}>{page}</span> / {totalPages}
           </span>
           <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs disabled:opacity-30 transition-all duration-200 btn-ghost">
